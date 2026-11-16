@@ -1,6 +1,6 @@
 # Exemplos do robô de redes sociais
 
-Gerado a 16/11/2026 23:37 (hora de Lisboa) com dados reais. **Nada foi publicado.**
+Gerado a 16/11/2026 23:39 (hora de Lisboa) com dados reais. **Nada foi publicado.**
 
 ## SwimHeat — provas da semana
 - **Quando:** segunda-feira 19:00
@@ -86,7 +86,7 @@ Sources: MeteoAlarm (EUMETNET, CC BY 4.0), GDACS. Always follow your local autho
 #StormHome #weather #severeweather #meteo
 ```
 
-## FlightHome — aterragens de emergência (7700)
+## FlightHome — aterragens de emergência (7700) de 2026-11-15
 - **Quando:** todos os dias às 09:00 (só se houver casos)
 - **Onde:** Facebook + Instagram
 - **Imagem:** out/2026-11-15/flighthome.png
@@ -103,6 +103,31 @@ Squawk 7700 asks air traffic control for priority — for medical, technical or 
 
 🇵🇹 Aterragens de emergência · 15 nov
 • RYR7RJ (B738) declarou 7700 e aterrou em Dublin (DUB)
+O código 7700 pede prioridade ao controlo aéreo — por razões médicas, técnicas ou por precaução. Não sabemos a causa de cada caso.
+
+Follow flights live · Segue os voos ao vivo: flighthome.app (link in bio)
+Public ADS-B data: adsb.lol (ODbL).
+
+#FlightHome #aviation #avgeek #squawk7700
+```
+
+## FlightHome — aterragens de emergência (7700) de hoje, 2026-11-16 (até agora)
+- **Quando:** todos os dias às 09:00 (só se houver casos)
+- **Onde:** Facebook + Instagram
+- **Imagem:** out/2026-11-16/flighthome.png
+- **Nota:** 9 aviões no registo do dia; 1 com 7700, vistos 2+ vezes e parados a menos de 15 km de um aeroporto. Percurso no mapa: só o primeiro e o último ponto (linha tracejada).
+
+![imagem](../out/2026-11-16/flighthome.png)
+
+```
+✈️ Emergency landings · 16 Nov 2026
+
+• SWA4325 (B38M) squawked 7700 and landed in Las Vegas (LAS)
+
+Squawk 7700 asks air traffic control for priority — for medical, technical or precautionary reasons. We don't know the cause of each case.
+
+🇵🇹 Aterragens de emergência · 16 nov
+• SWA4325 (B38M) declarou 7700 e aterrou em Las Vegas (LAS)
 O código 7700 pede prioridade ao controlo aéreo — por razões médicas, técnicas ou por precaução. Não sabemos a causa de cada caso.
 
 Follow flights live · Segue os voos ao vivo: flighthome.app (link in bio)
