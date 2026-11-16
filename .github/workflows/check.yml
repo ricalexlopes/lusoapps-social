@@ -1,0 +1,21 @@
+# Read-only check of the three page keys: prints the page name and the linked Instagram account.
+# Nothing is published. Keys stay in the repository secrets and are masked in the log.
+name: check-keys
+on: [workflow_dispatch, push]
+permissions: {}
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check each page key
+        env:
+          SWIMHEAT: ${{ secrets.FB_TOKEN_SWIMHEAT }}
+          FLIGHTHOME: ${{ secrets.FB_TOKEN_FLIGHTHOME }}
+          STORMHOME: ${{ secrets.FB_TOKEN_STORMHOME }}
+        run: |
+          for b in SWIMHEAT FLIGHTHOME STORMHOME; do
+            t="${!b}"
+            if [ -z "$t" ]; then echo "$b: secret missing"; continue; fi
+            r=$(curl -s "https://graph.facebook.com/v21.0/me?fields=id,name,instagram_business_account%7Busername%7D&access_token=$t")
+            echo "$b -> $(echo "$r" | jq -c '{page:.name, page_id:.id, instagram:.instagram_business_account.username, error:.error.message}')"
+          done
