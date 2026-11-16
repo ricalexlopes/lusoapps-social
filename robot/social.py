@@ -192,8 +192,8 @@ def stormhome(today):
     t = [f"⚠️ Avisos meteorológicos na Europa · {today.day} {MES[today.month-1]}", ""]
     for nred, rred, rora, nome, haz in rows[:10]:
         lvl = []
-        if rred: lvl.append(f"🔴 {rred} região{'ões' if rred > 1 else ''}")
-        if rora: lvl.append(f"🟠 {rora} região{'ões' if rora > 1 else ''}")
+        if rred: lvl.append(f"🔴 {rred} {'regiões' if rred > 1 else 'região'}")
+        if rora: lvl.append(f"🟠 {rora} {'regiões' if rora > 1 else 'região'}")
         t.append(f"• {nome}: {' · '.join(lvl)} — {', '.join(haz)}")
     if len(rows) > 10:
         t.append(f"• e mais {len(rows) - 10} países com aviso laranja")
@@ -249,7 +249,7 @@ def flighthome(today):
         t.append(f"• {who}{typ} — aterrou em {ap[3]} ({ap[1] or ap[0]}) · código {code}")
     if len(landed) > 8:
         t.append(f"• e mais {len(landed) - 8}")
-    t += ["", "Os pilotos marcam 7700 sempre que precisam de prioridade — muitas vezes por um passageiro doente ou por precaução.",
+    t += ["", "O código 7700 pede prioridade ao controlo aéreo — por razões médicas, técnicas ou por precaução. Não sabemos a causa de cada caso.",
           "Yesterday's emergency squawks that ended on the ground · flighthome.app (link na bio)",
           "", "Dados ADS-B públicos (adsb.lol, ODbL). Sem especulação sobre causas.",
           "", "#FlightHome #aviation #avgeek #squawk7700"]
