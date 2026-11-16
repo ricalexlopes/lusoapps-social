@@ -1,5 +1,5 @@
-# Writes example posts for SwimHeat, StormHome and FlightHome from each site's public data into examples/LATEST.md.
-# Publishes NOTHING and uses no page keys (no secrets are passed to this job).
+# Writes example posts (text + image) from each site's public data into examples/ and out/.
+# Publishes NOTHING and gets no page keys.
 name: examples
 on:
   workflow_dispatch:
@@ -8,20 +8,23 @@ on:
     paths: ["robot/**", ".github/workflows/examples.yml"]
 permissions:
   contents: write
-concurrency: { group: examples, cancel-in-progress: false }
+concurrency: { group: repo-write, cancel-in-progress: false }
 jobs:
   examples:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
-      - name: Write the examples (nothing is published)
-        run: python robot/social.py | tee -a "$GITHUB_STEP_SUMMARY"
-      - name: Save examples/LATEST.md
+      - run: pip install --quiet matplotlib
+      - name: Save FlightHome tracks, then write the examples (nothing is published)
+        run: |
+          python robot/social.py collect
+          python robot/social.py examples | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Save the examples
         run: |
           git config user.name "lusoapps-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add examples/LATEST.md
-          git diff --cached --quiet || (git commit -m "Example posts (not published)" && git push)
+          git add examples out traces 2>/dev/null || true
+          git diff --cached --quiet || (git commit -m "Example posts (not published)" && git pull --rebase -q && git push)

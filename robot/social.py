@@ -1,26 +1,34 @@
 #!/usr/bin/env python3
 """LusoApps social robot - writes the brand posts from each site's public data.
 
-This version only WRITES EXAMPLES (examples/LATEST.md). It publishes nothing and uses no page keys.
+  python robot/social.py examples          write examples/LATEST.md + images (publishes nothing)
+  python robot/social.py collect           FlightHome: save the tracks of today's 7700 landings (adsb.lol keeps ~24 h only)
+  python robot/social.py prepare <kind>    write queue/<date>-<kind>.json + its image (publishes nothing)
 
-Posts:
-  swimheat-week    Monday: meets of the week in Portugal and Spain + deadlines for qualifying times
-  swimheat-sunday  Sunday evening: summary of the weekend (numbers only, never swimmers' names)
-  stormhome        Daily, only when there are orange/red warnings in Europe or an active tropical cyclone
-  flighthome       Daily: aircraft that declared an emergency yesterday (7700/7600) and landed
+Publishing is done only by robot/publish.py, for files placed in approved/ (see README).
 
-Data: swimheat.app/data (season lists built from public live.swimrankings.net files),
-stormhome.app/api (MeteoAlarm, CC BY 4.0; GDACS), flighthome.app/api/emglog (public ADS-B data, adsb.lol, ODbL).
+Posts (kinds):
+  swimheat-week    Monday 19:00: meets of the week in Portugal and Spain + deadlines (from 23 Nov 2026)
+  swimheat-sunday  Sunday 21:00: the weekend in numbers (numbers only, never swimmers' names) (from 29 Nov 2026)
+  stormhome        08:00, only with orange/red warnings in Europe or an orange/red tropical cyclone - English first
+  flighthome       09:00, only if aircraft squawked 7700 yesterday and landed - English first, map of the track
 """
-import json, math, sys, datetime as dt, urllib.request, urllib.error
+import json, math, os, sys, datetime as dt, urllib.request
 from zoneinfo import ZoneInfo
 
-UA = "LusoApps-social/0.1 (+https://lusoapps.com)"
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+sys.path.insert(0, HERE)
+import cards
+
+UA = "LusoApps-social/0.2 (+https://lusoapps.com)"
 TZ = ZoneInfo("Europe/Lisbon")
 SWIM, STORM, FLIGHT = "https://swimheat.app", "https://stormhome.app", "https://flighthome.app"
+RAW = "https://raw.githubusercontent.com/ricalexlopes/lusoapps-social/main/"
 PHOTOS = "https://lusoapps.com/social/fotos/"
 SWIM_PHOTOS = ["livres-de-cima.jpg", "mariposa-escuro.jpg", "livres-pistas-vertical.jpg", "drone-partida.jpg", "livres-prova.jpg",
                "subaquatica-nadador.jpg", "mariposa-prova.jpg", "mariposa-frente.jpg", "piscina-vazia-pistas.jpg", "subaquatica-pista.jpg"]
+SWIM_START = {"swimheat-week": dt.date(2026, 11, 23), "swimheat-sunday": dt.date(2026, 11, 29)}
 
 def get(url, timeout=25):
     req = urllib.request.Request(url, headers={"user-agent": UA, "accept": "application/json"})
@@ -29,14 +37,15 @@ def get(url, timeout=25):
 
 def head_ok(url):
     try:
-        req = urllib.request.Request(url, method="HEAD", headers={"user-agent": UA})
-        with urllib.request.urlopen(req, timeout=15) as r:
+        with urllib.request.urlopen(urllib.request.Request(url, method="HEAD", headers={"user-agent": UA}), timeout=15) as r:
             return r.status == 200
     except Exception:
         return False
 
 MES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
 MES_ES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
+MON_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+MONTH_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 DIA = ["seg", "ter", "qua", "qui", "sex", "sáb", "dom"]
 DIA_ES = ["lun", "mar", "mié", "jue", "vie", "sáb", "dom"]
 
@@ -44,7 +53,6 @@ def d(s):
     return dt.date.fromisoformat(s[:10])
 
 def span(a, b, es=False):
-    """'sáb 21–dom 22 nov' / 'sáb 21 nov'"""
     A, B = d(a), d(b or a)
     dn, mn = (DIA_ES, MES_ES) if es else (DIA, MES)
     if A == B:
@@ -52,10 +60,10 @@ def span(a, b, es=False):
     return f"{dn[A.weekday()]} {A.day}–{dn[B.weekday()]} {B.day} {mn[B.month-1]}"
 
 def title(s):
-    """Meet names come in capitals from some organisers: 'LLIGA PROVINCIAL' -> 'Lliga Provincial'."""
+    """'LLIGA PROVINCIAL' -> 'Lliga Provincial' (some organisers write meet names in capitals)."""
     s = " ".join(s.split())
-    if sum(c.isupper() for c in s) > 0.7 * sum(c.isalpha() for c in s):
-        small = {"de", "del", "la", "el", "y", "i", "e", "da", "do", "das", "dos"}
+    if sum(c.isupper() for c in s) > 0.7 * max(1, sum(c.isalpha() for c in s)):
+        small = {"de", "del", "la", "el", "y", "i", "e", "da", "do", "das", "dos", "of", "and"}
         w = s.lower().split()
         s = " ".join(x if (k and x in small) else x[:1].upper() + x[1:] for k, x in enumerate(w))
     return s
@@ -63,16 +71,22 @@ def title(s):
 def photo(i):
     return PHOTOS + SWIM_PHOTOS[i % len(SWIM_PHOTOS)]
 
-# ---------------------------------------------------------------- SwimHeat: the week
+def outdir(day):
+    p = os.path.join(ROOT, "out", day.isoformat())
+    os.makedirs(p, exist_ok=True)
+    return p
+
+def rel(path):
+    return os.path.relpath(path, ROOT).replace(os.sep, "/")
+
+# ================================================================ SwimHeat
 def swimheat_week(today):
     mon = today - dt.timedelta(days=today.weekday())
     sun = mon + dt.timedelta(days=6)
     lists = {n: get(f"{SWIM}/data/{n}.json") for n in ("POR", "ESP")}
     cal = get(f"{SWIM}/data/cal-POR.json").get("items", [])
-    week = {}
-    for n, L in lists.items():
-        week[n] = sorted([m for m in L["meets"] if d(m["from"]) <= sun and d(m["to"]) >= mon and m.get("status") != "finished"],
-                         key=lambda m: (m["from"], m["city"]))
+    week = {n: sorted([m for m in L["meets"] if d(m["from"]) <= sun and d(m["to"]) >= mon and m.get("status") != "finished"],
+                      key=lambda m: (m["from"], m["city"])) for n, L in lists.items()}
     dl = [c for c in cal if c.get("dl") and mon <= d(c["date"]) <= sun]
     if not week["POR"] and not week["ESP"] and not dl:
         return None
@@ -92,10 +106,9 @@ def swimheat_week(today):
     t += ["Segue o teu nadador ao vivo: provas, tempos, lugares e mínimos no telemóvel. Grátis.",
           "Sigue a tu nadador en directo · Follow your swimmer live.",
           "📲 swimheat.app (link na bio)", "", "#natação #natacion #swimming #SwimHeat"]
-    return {"brand": "SwimHeat", "when": "segunda-feira 19:00", "where": "Facebook + Instagram",
-            "photo": photo(mon.toordinal() // 7), "text": "\n".join(t)}
+    return {"brand": "swimheat", "kind": "swimheat-week", "when": "segunda-feira 19:00",
+            "image_url": photo(mon.toordinal() // 7), "text": "\n".join(t)}
 
-# ---------------------------------------------------------------- SwimHeat: the weekend in numbers
 def swimheat_sunday(today):
     sun = today if today.weekday() == 6 else today - dt.timedelta(days=today.weekday() + 1)
     sat = sun - dt.timedelta(days=1)
@@ -107,9 +120,9 @@ def swimheat_sunday(today):
         best, st = {}, {"meets": 0, "swims": 0, "sw": set(), "clubs": set(), "better": 0, "cities": []}
         for i in done:
             m = meets[i]
-            inwk = sat <= d(m["from"]) <= sun or sat <= d(m["to"]) <= sun
             if d(m["from"]) > sun:
                 continue
+            inwk = sat <= d(m["from"]) <= sun or sat <= d(m["to"]) <= sun
             try:
                 R = get(f"{SWIM}/data/res/{i}.json")
             except Exception:
@@ -122,7 +135,7 @@ def swimheat_sunday(today):
                 if not t or status:
                     continue
                 ev = R["ev"].get(str(e), {})
-                if ev.get("rc", 1) != 1:  # individual events only
+                if ev.get("rc", 1) != 1:
                     continue
                 s = R["sw"][si]
                 key = (s[1], s[2], ev.get("d"), ev.get("s"), ev.get("g"), pool)
@@ -148,39 +161,49 @@ def swimheat_sunday(today):
     t += ["", "Todos os resultados, parciais e recordes pessoais na app. Grátis.",
           "Todos los resultados en la app · All results in the app.",
           "📲 swimheat.app (link na bio)", "", "#natação #natacion #swimming #SwimHeat"]
-    return {"brand": "SwimHeat", "when": "domingo 21:00", "where": "Facebook + Instagram",
-            "photo": photo(sun.toordinal() // 7 + 5), "text": "\n".join(t),
-            "note": "Só números, nunca nomes. 'Melhor tempo da época' compara com os tempos que o SwimHeat tem desta época (só Portugal, onde temos a época completa)."}
+    return {"brand": "swimheat", "kind": "swimheat-sunday", "when": "domingo 21:00",
+            "image_url": photo(sun.toordinal() // 7 + 5), "text": "\n".join(t),
+            "note": "Só números, nunca nomes. 'Melhor tempo da época' compara com os tempos desta época que o SwimHeat tem (só Portugal)."}
 
-# ---------------------------------------------------------------- StormHome
-COUNTRIES = {"andorra": "Andorra", "austria": "Áustria", "belgium": "Bélgica", "bosnia-herzegovina": "Bósnia", "bulgaria": "Bulgária",
-             "croatia": "Croácia", "cyprus": "Chipre", "czechia": "Chéquia", "denmark": "Dinamarca", "estonia": "Estónia", "finland": "Finlândia",
-             "france": "França", "germany": "Alemanha", "greece": "Grécia", "hungary": "Hungria", "iceland": "Islândia", "ireland": "Irlanda",
-             "israel": "Israel", "italy": "Itália", "latvia": "Letónia", "lithuania": "Lituânia", "luxembourg": "Luxemburgo", "malta": "Malta",
-             "moldova": "Moldávia", "montenegro": "Montenegro", "netherlands": "Países Baixos", "norway": "Noruega", "poland": "Polónia",
-             "portugal": "Portugal", "republic-of-north-macedonia": "Macedónia do Norte", "romania": "Roménia", "serbia": "Sérvia",
-             "slovakia": "Eslováquia", "slovenia": "Eslovénia", "spain": "Espanha", "sweden": "Suécia", "switzerland": "Suíça",
-             "ukraine": "Ucrânia", "united-kingdom": "Reino Unido"}
-HAZ = {"wind": "vento", "snow-ice": "neve/gelo", "snow/ice": "neve/gelo", "thunderstorm": "trovoada", "fog": "nevoeiro",
-       "high-temperature": "calor", "extreme high temperature": "calor", "low-temperature": "frio", "extreme low temperature": "frio",
-       "coastalevent": "agitação marítima", "coastal event": "agitação marítima", "forest-fire": "incêndio", "forest fire": "incêndio",
-       "avalanches": "avalanches", "avalanche": "avalanches", "rain": "chuva", "flooding": "cheias", "rain-flood": "chuva/cheias", "flood": "cheias"}
+# ================================================================ StormHome
+COUNTRIES = {"andorra": ("Andorra", "Andorra"), "austria": ("Austria", "Áustria"), "belgium": ("Belgium", "Bélgica"),
+             "bosnia-herzegovina": ("Bosnia", "Bósnia"), "bulgaria": ("Bulgaria", "Bulgária"), "croatia": ("Croatia", "Croácia"),
+             "cyprus": ("Cyprus", "Chipre"), "czechia": ("Czechia", "Chéquia"), "denmark": ("Denmark", "Dinamarca"),
+             "estonia": ("Estonia", "Estónia"), "finland": ("Finland", "Finlândia"), "france": ("France", "França"),
+             "germany": ("Germany", "Alemanha"), "greece": ("Greece", "Grécia"), "hungary": ("Hungary", "Hungria"),
+             "iceland": ("Iceland", "Islândia"), "ireland": ("Ireland", "Irlanda"), "israel": ("Israel", "Israel"),
+             "italy": ("Italy", "Itália"), "latvia": ("Latvia", "Letónia"), "lithuania": ("Lithuania", "Lituânia"),
+             "luxembourg": ("Luxembourg", "Luxemburgo"), "malta": ("Malta", "Malta"), "moldova": ("Moldova", "Moldávia"),
+             "montenegro": ("Montenegro", "Montenegro"), "netherlands": ("Netherlands", "Países Baixos"), "norway": ("Norway", "Noruega"),
+             "poland": ("Poland", "Polónia"), "portugal": ("Portugal", "Portugal"),
+             "republic-of-north-macedonia": ("North Macedonia", "Macedónia do Norte"), "romania": ("Romania", "Roménia"),
+             "serbia": ("Serbia", "Sérvia"), "slovakia": ("Slovakia", "Eslováquia"), "slovenia": ("Slovenia", "Eslovénia"),
+             "spain": ("Spain", "Espanha"), "sweden": ("Sweden", "Suécia"), "switzerland": ("Switzerland", "Suíça"),
+             "ukraine": ("Ukraine", "Ucrânia"), "united-kingdom": ("United Kingdom", "Reino Unido")}
+HAZ = {"wind": ("wind", "vento"), "snow-ice": ("snow/ice", "neve/gelo"), "snow/ice": ("snow/ice", "neve/gelo"),
+       "thunderstorm": ("thunderstorms", "trovoada"), "thunderstorms": ("thunderstorms", "trovoada"), "fog": ("fog", "nevoeiro"),
+       "high-temperature": ("heat", "calor"), "extreme high temperature": ("heat", "calor"), "high temperature": ("heat", "calor"),
+       "low-temperature": ("cold", "frio"), "extreme low temperature": ("cold", "frio"), "low temperature": ("cold", "frio"),
+       "coastalevent": ("coastal", "agitação marítima"), "coastal event": ("coastal", "agitação marítima"),
+       "forest-fire": ("fire risk", "incêndio"), "forest fire": ("fire risk", "incêndio"), "avalanches": ("avalanches", "avalanches"),
+       "avalanche": ("avalanches", "avalanches"), "rain": ("rain", "chuva"), "flooding": ("flooding", "cheias"),
+       "rain-flood": ("rain/flood", "chuva/cheias"), "flood": ("flooding", "cheias")}
 
 def stormhome(today):
     rows, failed = [], 0
-    for c, nome in COUNTRIES.items():
+    for c, (en, pt) in COUNTRIES.items():
         try:
             W = get(f"{STORM}/api/warnings/eu/{c}")
         except Exception:
             failed += 1
             continue
-        now = dt.datetime.now(dt.timezone.utc)
         red = [w for w in W if w.get("l") == 4]
         orange = [w for w in W if w.get("l") == 3]
         if not red and not orange:
             continue
-        haz = sorted({HAZ.get(w.get("t", "").lower(), w.get("t", "").lower()) for w in red + orange})
-        rows.append((len(red), len({w["e"] for w in red}), len({w["e"] for w in orange}), nome, haz))
+        hz = sorted({HAZ.get(w.get("t", "").lower(), (w.get("t", "").lower(),) * 2) for w in red + orange})
+        rows.append({"en": en, "pt": pt, "red": len({w["e"] for w in red}), "orange": len({w["e"] for w in orange}),
+                     "hz_en": ", ".join(sorted({h[0] for h in hz})), "hz_pt": ", ".join(sorted({h[1] for h in hz}))})
     try:
         S = get(f"{STORM}/api/storms").get("features", [])
     except Exception:
@@ -188,105 +211,249 @@ def stormhome(today):
     storms = [f["properties"] for f in S if f.get("properties", {}).get("alertlevel") in ("Orange", "Red")]
     if not rows and not storms:
         return None
-    rows.sort(key=lambda r: (-r[0], -r[1], -r[2], r[3]))
-    t = [f"⚠️ Avisos meteorológicos na Europa · {today.day} {MES[today.month-1]}", ""]
-    for nred, rred, rora, nome, haz in rows[:10]:
-        lvl = []
-        if rred: lvl.append(f"🔴 {rred} {'regiões' if rred > 1 else 'região'}")
-        if rora: lvl.append(f"🟠 {rora} {'regiões' if rora > 1 else 'região'}")
-        t.append(f"• {nome}: {' · '.join(lvl)} — {', '.join(haz)}")
+    rows.sort(key=lambda r: (-r["red"], -r["orange"], r["en"]))
+    en_date = f"{today.day} {MONTH_EN[today.month-1]} {today.year}"
+    t = [f"⚠️ Severe weather warnings in Europe · {today.day} {MON_EN[today.month-1]}", ""]
+    for r in rows[:10]:
+        lv = ([f"🔴 {r['red']} red"] if r["red"] else []) + ([f"🟠 {r['orange']} orange"] if r["orange"] else [])
+        t.append(f"• {r['en']}: {' · '.join(lv)} — {r['hz_en']}")
     if len(rows) > 10:
-        t.append(f"• e mais {len(rows) - 10} países com aviso laranja")
+        t.append(f"• + {len(rows) - 10} more countries with orange warnings")
     for s in storms[:3]:
-        t.append(f"🌀 {s.get('name','')} — alerta {'vermelho' if s.get('alertlevel') == 'Red' else 'laranja'} (GDACS)")
-    t += ["", "Segue os avisos oficiais no mapa e recebe alertas para a tua zona e para a tua viagem.",
-          "Official warnings on a live map · stormhome.app (link na bio)",
-          "", "Fontes: MeteoAlarm (EUMETNET, CC BY 4.0), GDACS. Segue sempre as indicações da proteção civil e do serviço meteorológico do teu país.",
-          "", "#StormHome #meteo #weather #avisos"]
-    return {"brand": "StormHome", "when": "todos os dias às 08:00, só quando há laranja/vermelho ou ciclone", "where": "Facebook + Instagram",
-            "photo": "imagem do globo com os avisos (a gerar a partir do site) ou foto da biblioteca StormHome",
-            "text": "\n".join(t), "note": (f"{failed} países não responderam nesta leitura." if failed else "")}
+        t.append(f"🌀 Tropical cyclone {s.get('name','')} — {'red' if s.get('alertlevel') == 'Red' else 'orange'} alert (GDACS)")
+    t += ["(number of regions with a warning)", "", "🇵🇹 Avisos laranja e vermelhos na Europa hoje:"]
+    for r in rows[:10]:
+        lv = ([f"🔴 {r['red']}"] if r["red"] else []) + ([f"🟠 {r['orange']}"] if r["orange"] else [])
+        t.append(f"• {r['pt']}: {' · '.join(lv)} — {r['hz_pt']}")
+    t += ["", "Official warnings on a live map, alerts for your area and your trip: stormhome.app (link in bio)",
+          "Avisos oficiais no mapa e alertas para a tua zona e para a tua viagem.",
+          "", "Sources: MeteoAlarm (EUMETNET, CC BY 4.0), GDACS. Always follow your local authorities and weather service.",
+          "", "#StormHome #weather #severeweather #meteo"]
+    img = cards.storm_card(en_date, [(r["en"], r["red"], r["orange"], r["hz_en"]) for r in rows],
+                           [(s.get("name", ""), "red" if s.get("alertlevel") == "Red" else "orange") for s in storms],
+                           os.path.join(outdir(today), "stormhome.png"))
+    return {"brand": "stormhome", "kind": "stormhome", "when": "todos os dias às 08:00 (só se houver laranja/vermelho ou ciclone)",
+            "image": rel(img), "text": "\n".join(t), "note": (f"{failed} países não responderam nesta leitura." if failed else "")}
 
-# ---------------------------------------------------------------- FlightHome
-def haversine(a, b, c, e):
-    R = 6371.0
+# ================================================================ FlightHome
+def km(a, b, c, e):
     p1, p2 = math.radians(a), math.radians(c)
-    dp, dl = p2 - p1, math.radians(e - b)
-    x = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
-    return 2 * R * math.asin(math.sqrt(x))
+    x = math.sin((p2 - p1) / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(math.radians(e - b) / 2) ** 2
+    return 2 * 6371.0 * math.asin(math.sqrt(x))
 
-def flighthome(today):
-    day = today - dt.timedelta(days=1)
+_airports = None
+def airports():
+    global _airports
+    if _airports is None:
+        _airports = [a for a in get(f"{FLIGHT}/data/airports.json") if a[7] and a[7] >= 1]
+    return _airports
+
+def nearest_airport(la, lo, maxkm=15):
+    best = min(airports(), key=lambda a: km(la, lo, a[5], a[6]))
+    return best if km(la, lo, best[5], best[6]) <= maxkm else None
+
+def landed_7700(day):
+    """Entries of the FlightHome emergency log for a UTC day that squawked 7700, were seen 2+ times and stopped on the
+    ground near a known airport. 7600 (radio failure) and 7500 are never posted."""
     L = get(f"{FLIGHT}/api/emglog?day={day.isoformat()}").get("list", [])
-    try:
-        AP = [a for a in get(f"{FLIGHT}/data/airports.json") if a[7] and a[7] >= 1]
-    except Exception:
-        AP = []
-    landed = []
+    out = []
     for e in L:
-        q = e.get("q", "")
-        if q not in ("7700", "7600"):  # 7500 (hijack) is never posted: often a wrong code, and too sensitive
+        if e.get("q") != "7700" and "7700" not in (e.get("qs") or []):
             continue
         last = e.get("last") or {}
         on_ground = last.get("g") == 1 or ((last.get("al") or 99999) <= 300 and (last.get("s") or 999) <= 60)
-        if not on_ground or e.get("n", 0) < 2:  # seen at least twice, so a one-off wrong code is left out
+        if not on_ground or e.get("n", 0) < 2 or last.get("la") is None:
             continue
-        ap = None
-        if AP and last.get("la") is not None:
-            best = min(AP, key=lambda a: haversine(last["la"], last["lo"], a[5], a[6]))
-            if haversine(last["la"], last["lo"], best[5], best[6]) <= 15:
-                ap = best
-        if not ap:  # landed somewhere we cannot name with confidence: leave it out
+        ap = nearest_airport(last["la"], last["lo"])
+        if ap:
+            out.append((e, ap))
+    return out, len(L)
+
+def trace_path(day, hexid):
+    return os.path.join(ROOT, "traces", day.isoformat(), hexid.lower() + ".json")
+
+def collect():
+    """Save the tracks of 7700 landings of today and yesterday (UTC) while adsb.lol still has them."""
+    now = dt.datetime.now(dt.timezone.utc)
+    saved = 0
+    for day in (now.date(), now.date() - dt.timedelta(days=1)):
+        try:
+            landed, _ = landed_7700(day)
+        except Exception as ex:
+            print("emglog", day, type(ex).__name__)
             continue
-        landed.append((e, ap))
+        for e, ap in landed:
+            p = trace_path(day, e["h"])
+            if os.path.exists(p):
+                continue
+            try:
+                T = get(f"{FLIGHT}/api/trace?hex={e['h']}")
+            except Exception as ex:
+                print("trace", e["h"], type(ex).__name__)
+                continue
+            if not T.get("pts"):
+                continue
+            os.makedirs(os.path.dirname(p), exist_ok=True)
+            json.dump({"hex": e["h"], "r": T.get("r", ""), "t": T.get("t", ""), "desc": T.get("desc", ""), "from": T.get("from", 0),
+                       "pts": T["pts"]}, open(p, "w"), separators=(",", ":"))
+            saved += 1
+    # keep 10 days of tracks
+    base = os.path.join(ROOT, "traces")
+    if os.path.isdir(base):
+        cut = (now.date() - dt.timedelta(days=10)).isoformat()
+        for dd in os.listdir(base):
+            if dd < cut:
+                for f in os.listdir(os.path.join(base, dd)):
+                    os.remove(os.path.join(base, dd, f))
+                os.rmdir(os.path.join(base, dd))
+    print(f"collect: {saved} new tracks")
+
+def flight_leg(T, land_ms):
+    """From a saved track, the flight that ends at the landing nearest to land_ms: (points [(lat, lon)], landing time UTC)."""
+    pts, t0 = T["pts"], T.get("from", 0)
+    if not pts:
+        return None, None
+    abs_t = lambda p: (t0 + p[0]) * 1000
+    # landing = first ground point after an airborne point, nearest to the time the log last saw the aircraft
+    landings = [i for i in range(1, len(pts)) if pts[i][3] == -1 and pts[i - 1][3] not in (-1, None)]
+    if not landings:
+        return None, None
+    li = min(landings, key=lambda i: abs(abs_t(pts[i]) - land_ms))
+    if abs(abs_t(pts[li]) - land_ms) > 3 * 3600e3:
+        return None, None
+    si = li - 1
+    while si > 0 and pts[si - 1][3] != -1 and (pts[si][0] - pts[si - 1][0]) < 1800:
+        si -= 1
+    leg = [(p[1], p[2]) for p in pts[si:li + 1]]
+    when = dt.datetime.fromtimestamp(abs_t(pts[li]) / 1000, dt.timezone.utc)
+    return leg, when
+
+def ac_name(e, T):
+    desc = (T or {}).get("desc") or ""
+    if desc:
+        w = desc.split()
+        return " ".join(x if any(ch.isdigit() for ch in x) else x.capitalize() for x in w)
+    return e.get("t") or ""
+
+def flighthome(day):
+    """Post about `day` (UTC): aircraft that squawked 7700 and landed."""
+    landed, total = landed_7700(day)
     if not landed:
         return None
-    t = [f"✈️ Emergências de ontem que terminaram em terra · {day.day} {MES[day.month-1]}", ""]
-    for e, ap in landed[:8]:
-        who = e.get("f") or e.get("r") or e.get("h", "").upper()
-        typ = f" ({e['t']})" if e.get("t") else ""
-        code = "7700 emergência" if e.get("q") == "7700" else "7600 falha de rádio"
-        t.append(f"• {who}{typ} — aterrou em {ap[3]} ({ap[1] or ap[0]}) · código {code}")
-    if len(landed) > 8:
-        t.append(f"• e mais {len(landed) - 8}")
-    t += ["", "O código 7700 pede prioridade ao controlo aéreo — por razões médicas, técnicas ou por precaução. Não sabemos a causa de cada caso.",
-          "Yesterday's emergency squawks that ended on the ground · flighthome.app (link na bio)",
-          "", "Dados ADS-B públicos (adsb.lol, ODbL). Sem especulação sobre causas.",
-          "", "#FlightHome #aviation #avgeek #squawk7700"]
-    return {"brand": "FlightHome", "when": "todos os dias às 09:00 (só se houver casos)", "where": "Facebook + Instagram",
-            "photo": "mapa FlightHome com os pontos de aterragem (a gerar) ou foto da biblioteca FlightHome",
-            "text": "\n".join(t),
-            "note": f"{len(L)} aviões no registo de ontem; {len(landed)} com 7700/7600, vistos 2+ vezes e parados a menos de 15 km de um aeroporto conhecido."}
+    items = []
+    for e, ap in landed:
+        T = None
+        p = trace_path(day, e["h"])
+        if os.path.exists(p):
+            T = json.load(open(p))
+        leg, when = flight_leg(T, (e.get("last") or {}).get("t", 0)) if T else (None, None)
+        who = e.get("f") or e.get("r") or e["h"].upper()
+        items.append({"who": who, "type": ac_name(e, T), "code": e.get("t", ""), "ap": ap, "leg": leg, "when": when, "e": e})
+    items.sort(key=lambda x: (x["leg"] is None, x["when"] or dt.datetime.max.replace(tzinfo=dt.timezone.utc)))
+    head = f"{day.day} {MON_EN[day.month-1]} {day.year}"
+    t = [f"✈️ Emergency landings · {head}", ""]
+    for x in items[:8]:
+        at = f" at {x['when'].strftime('%H:%M')} UTC" if x["when"] else ""
+        typ = f" ({x['type']})" if x["type"] else ""
+        t.append(f"• {x['who']}{typ} squawked 7700 and landed{at} in {x['ap'][3]} ({x['ap'][1] or x['ap'][0]})")
+    if len(items) > 8:
+        t.append(f"• + {len(items) - 8} more")
+    t += ["", "Squawk 7700 asks air traffic control for priority — for medical, technical or precautionary reasons. We don't know the cause of each case.",
+          "", f"🇵🇹 Aterragens de emergência · {day.day} {MES[day.month-1]}"]
+    for x in items[:8]:
+        at = f" às {x['when'].strftime('%H:%M')} UTC" if x["when"] else ""
+        typ = f" ({x['code']})" if x["code"] else ""
+        t.append(f"• {x['who']}{typ} declarou 7700 e aterrou{at} em {x['ap'][3]} ({x['ap'][1] or x['ap'][0]})")
+    t += ["O código 7700 pede prioridade ao controlo aéreo — por razões médicas, técnicas ou por precaução. Não sabemos a causa de cada caso.",
+          "", "Follow flights live · Segue os voos ao vivo: flighthome.app (link in bio)",
+          "Public ADS-B data: adsb.lol (ODbL).", "", "#FlightHome #aviation #avgeek #squawk7700"]
+    # map: the first case with a full track (else the first case, first/last log points, dashed)
+    x = items[0]
+    pts = x["leg"] or [((x["e"].get("first") or {}).get("la"), (x["e"].get("first") or {}).get("lo")),
+                       ((x["e"].get("last") or {}).get("la"), (x["e"].get("last") or {}).get("lo"))]
+    pts = [p for p in pts if p[0] is not None]
+    at = f" at {x['when'].strftime('%H:%M')} UTC" if x["when"] else ""
+    lines = [f"{x['who']}{' (' + x['type'] + ')' if x['type'] else ''} landed{at}",
+             f"in {x['ap'][3]} ({x['ap'][1] or x['ap'][0]}) after squawking 7700",
+             (f"+ {len(items) - 1} more emergency landing{'s' if len(items) > 2 else ''} that day" if len(items) > 1 else
+              "Track from public ADS-B data")]
+    img = cards.flight_map([{"pts": pts, "land": (x["ap"][5], x["ap"][6]), "label": f"{x['who']} · {x['ap'][1] or x['ap'][0]}"}],
+                           f"Emergency landings · {head}", lines, os.path.join(outdir(day), "flighthome.png"))
+    note = (f"{total} aviões no registo do dia; {len(items)} com 7700, vistos 2+ vezes e parados a menos de 15 km de um aeroporto. "
+            f"Percurso no mapa: {'completo' if x['leg'] else 'só o primeiro e o último ponto (linha tracejada)'}.")
+    return {"brand": "flighthome", "kind": "flighthome", "when": "todos os dias às 09:00 (só se houver casos)",
+            "image": rel(img), "text": "\n".join(t), "note": note}
 
-# ---------------------------------------------------------------- examples
-def main():
+# ================================================================ commands
+def build(kind, today):
+    if kind == "swimheat-week":
+        return swimheat_week(today)
+    if kind == "swimheat-sunday":
+        return swimheat_sunday(today)
+    if kind == "stormhome":
+        return stormhome(today)
+    if kind == "flighthome":
+        return flighthome(dt.datetime.now(dt.timezone.utc).date() - dt.timedelta(days=1))
+    raise SystemExit("unknown kind " + kind)
+
+def prepare(kind):
+    today = dt.datetime.now(TZ).date()
+    if kind in SWIM_START and today < SWIM_START[kind]:
+        print(f"{kind}: starts on {SWIM_START[kind]}"); return
+    p = build(kind, today)
+    if not p:
+        print(f"{kind}: nothing to post today"); return
+    os.makedirs(os.path.join(ROOT, "queue"), exist_ok=True)
+    f = os.path.join(ROOT, "queue", f"{today.isoformat()}-{kind}.json")
+    json.dump(p, open(f, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    print("prepared", rel(f))
+
+def examples():
     now = dt.datetime.now(TZ)
     today = now.date()
-    parts = [f"# Exemplos do robô de redes sociais", "",
+    parts = ["# Exemplos do robô de redes sociais", "",
              f"Gerado a {now.strftime('%d/%m/%Y %H:%M')} (hora de Lisboa) com dados reais. **Nada foi publicado.**", ""]
-    for name, fn in (("SwimHeat — provas da semana", swimheat_week), ("SwimHeat — resumo de domingo", swimheat_sunday),
-                     ("StormHome — avisos", stormhome), ("FlightHome — emergências que aterraram", flighthome)):
+    ex_dir = os.path.join(ROOT, "examples")
+    os.makedirs(ex_dir, exist_ok=True)
+    jobs = [("SwimHeat — provas da semana", lambda: swimheat_week(today)),
+            ("SwimHeat — resumo de domingo", lambda: swimheat_sunday(today)),
+            ("StormHome — avisos", lambda: stormhome(today))]
+    # FlightHome: yesterday, else today so far (UTC), so there is something to look at
+    utc = dt.datetime.now(dt.timezone.utc).date()
+    jobs.append(("FlightHome — aterragens de emergência (7700)",
+                 lambda: flighthome(utc - dt.timedelta(days=1)) or flighthome(utc)))
+    for name, fn in jobs:
         parts.append(f"## {name}")
         try:
-            p = fn(today)
+            p = fn()
         except Exception as ex:
             parts += [f"_Sem dados nesta leitura ({type(ex).__name__}: {str(ex)[:120]})._", ""]
             continue
         if not p:
             parts += ["_Hoje não publicaria nada (sem conteúdo para este tipo de publicação)._", ""]
             continue
-        ph = p["photo"]
-        ok = (" ✅" if head_ok(ph) else " ⚠️ (imagem não encontrada)") if ph.startswith("http") else ""
-        parts += [f"- **Quando:** {p['when']}", f"- **Onde:** {p['where']}", f"- **Imagem:** {ph}{ok}"]
+        if p.get("image"):
+            img = f"![imagem]({'../' + p['image']})"
+            ph = p["image"]
+        else:
+            ph = p["image_url"] + (" ✅" if head_ok(p["image_url"]) else " ⚠️ (imagem não encontrada)")
+            img = f"![imagem]({p['image_url']})"
+        parts += [f"- **Quando:** {p['when']}", "- **Onde:** Facebook + Instagram", f"- **Imagem:** {ph}"]
         if p.get("note"):
             parts.append(f"- **Nota:** {p['note']}")
-        parts += ["", "```", p["text"], "```", ""]
+        parts += ["", img, "", "```", p["text"], "```", ""]
+        json.dump(p, open(os.path.join(ex_dir, p["kind"] + ".json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     out = "\n".join(parts)
-    import os
-    os.makedirs("examples", exist_ok=True)
-    with open("examples/LATEST.md", "w", encoding="utf-8") as f:
-        f.write(out)
+    open(os.path.join(ex_dir, "LATEST.md"), "w", encoding="utf-8").write(out)
     print(out)
 
 if __name__ == "__main__":
-    sys.exit(main())
+    cmd = sys.argv[1] if len(sys.argv) > 1 else "examples"
+    if cmd == "examples":
+        examples()
+    elif cmd == "collect":
+        collect()
+    elif cmd == "prepare":
+        prepare(sys.argv[2])
+    else:
+        raise SystemExit(__doc__)

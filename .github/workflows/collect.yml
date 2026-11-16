@@ -1,0 +1,25 @@
+# FlightHome: every 2 hours, save the tracks of aircraft that squawked 7700 and landed (adsb.lol keeps a track ~24 h).
+# Reads public data only; publishes nothing; gets no page keys.
+name: collect-tracks
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */2 * * *"
+permissions:
+  contents: write
+concurrency: { group: repo-write, cancel-in-progress: false }
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install --quiet matplotlib
+      - run: python robot/social.py collect
+      - run: |
+          git config user.name "lusoapps-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add traces 2>/dev/null || true
+          git diff --cached --quiet || (git commit -m "FlightHome tracks" && git pull --rebase -q && git push)

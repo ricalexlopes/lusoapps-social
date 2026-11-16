@@ -1,7 +1,10 @@
 # Read-only check of the three page keys: prints the page name and the linked Instagram account.
 # Nothing is published. Keys stay in the repository secrets and are masked in the log.
 name: check-keys
-on: [workflow_dispatch, push]
+on:
+  workflow_dispatch:
+  push:
+    paths: [".github/workflows/check.yml"]
 permissions: {}
 jobs:
   check:
