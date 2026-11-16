@@ -272,6 +272,10 @@ def landed_7700(day):
 def trace_path(day, hexid):
     return os.path.join(ROOT, "traces", day.isoformat(), hexid.lower() + ".json")
 
+LOG = []
+def log(*a):
+    LOG.append(" ".join(str(x) for x in a)); print(*a)
+
 def collect():
     """Save the tracks of 7700 landings of today and yesterday (UTC) while adsb.lol still has them."""
     now = dt.datetime.now(dt.timezone.utc)
@@ -280,8 +284,9 @@ def collect():
         try:
             landed, _ = landed_7700(day)
         except Exception as ex:
-            print("emglog", day, type(ex).__name__)
+            log("emglog", day, type(ex).__name__, str(ex)[:120])
             continue
+        log("day", day, "7700 landed:", [e.get("f") or e["h"] for e, _ in landed])
         for e, ap in landed:
             p = trace_path(day, e["h"])
             if os.path.exists(p):
@@ -289,9 +294,10 @@ def collect():
             try:
                 T = get(f"{FLIGHT}/api/trace?hex={e['h']}")
             except Exception as ex:
-                print("trace", e["h"], type(ex).__name__)
+                log("trace", e["h"], type(ex).__name__, str(ex)[:160])
                 continue
             if not T.get("pts"):
+                log("trace", e["h"], "no points", str(T.get("error", ""))[:160])
                 continue
             os.makedirs(os.path.dirname(p), exist_ok=True)
             json.dump({"hex": e["h"], "r": T.get("r", ""), "t": T.get("t", ""), "desc": T.get("desc", ""), "from": T.get("from", 0),
@@ -306,7 +312,9 @@ def collect():
                 for f in os.listdir(os.path.join(base, dd)):
                     os.remove(os.path.join(base, dd, f))
                 os.rmdir(os.path.join(base, dd))
-    print(f"collect: {saved} new tracks")
+    log(f"collect: {saved} new tracks")
+    os.makedirs(os.path.join(ROOT, "examples"), exist_ok=True)
+    open(os.path.join(ROOT, "examples", "collect-log.txt"), "w").write(now.isoformat(timespec="seconds") + "\n" + "\n".join(LOG) + "\n")
 
 def flight_leg(T, land_ms):
     """From a saved track, the flight that ends at the landing nearest to land_ms: (points [(lat, lon)], landing time UTC)."""
