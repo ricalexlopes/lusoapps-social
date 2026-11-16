@@ -420,8 +420,10 @@ def examples():
             ("StormHome — avisos", lambda: stormhome(today))]
     # FlightHome: yesterday, else today so far (UTC), so there is something to look at
     utc = dt.datetime.now(dt.timezone.utc).date()
-    jobs.append(("FlightHome — aterragens de emergência (7700)",
-                 lambda: flighthome(utc - dt.timedelta(days=1)) or flighthome(utc)))
+    jobs.append((f"FlightHome — aterragens de emergência (7700) de {utc - dt.timedelta(days=1)}",
+                 lambda: flighthome(utc - dt.timedelta(days=1))))
+    jobs.append((f"FlightHome — aterragens de emergência (7700) de hoje, {utc} (até agora)",
+                 lambda: dict(flighthome(utc) or {}, kind="flighthome-today") or None))
     for name, fn in jobs:
         parts.append(f"## {name}")
         try:
@@ -429,7 +431,7 @@ def examples():
         except Exception as ex:
             parts += [f"_Sem dados nesta leitura ({type(ex).__name__}: {str(ex)[:120]})._", ""]
             continue
-        if not p:
+        if not p or not p.get("text"):
             parts += ["_Hoje não publicaria nada (sem conteúdo para este tipo de publicação)._", ""]
             continue
         if p.get("image"):

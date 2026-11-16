@@ -26,5 +26,5 @@ jobs:
         run: |
           git config user.name "lusoapps-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          for p in examples out traces; do [ -e "$p" ] && git add "$p"; done
+          for p in examples out traces; do if [ -e "$p" ]; then git add "$p"; fi; done
           git diff --cached --quiet || (git commit -m "Example posts (not published)" && git pull --rebase -q && git push)
