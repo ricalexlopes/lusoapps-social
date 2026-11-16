@@ -269,6 +269,26 @@ def landed_7700(day):
             out.append((e, ap))
     return out, len(L)
 
+def adsb_trace(hexid):
+    """Track straight from adsb.lol (ODbL), same format as flighthome.app/api/trace."""
+    import gzip
+    h = hexid.lower()
+    req = urllib.request.Request(f"https://adsb.lol/data/traces/{h[-2:]}/trace_full_{h}.json",
+                                 headers={"user-agent": UA, "accept-encoding": "gzip"})
+    with urllib.request.urlopen(req, timeout=40) as r:
+        raw = r.read()
+    if raw[:2] == b"\x1f\x8b":
+        raw = gzip.decompress(raw)
+    j = json.loads(raw.decode("utf-8"))
+    t0, pts, last = j.get("timestamp", 0), [], None
+    for p in j.get("trace", []):
+        alt = -1 if p[3] == "ground" else (None if p[3] is None else round(p[3]))
+        q = [round(p[0]), round(p[1], 4), round(p[2], 4), alt, None if p[4] is None else round(p[4])]
+        if last and q[0] - last[0] < 30 and (q[3] == -1) == (last[3] == -1):
+            continue
+        pts.append(q); last = q
+    return {"hex": h, "r": j.get("r", ""), "t": j.get("t", ""), "desc": j.get("desc", ""), "from": round(t0), "pts": pts}
+
 def trace_path(day, hexid):
     return os.path.join(ROOT, "traces", day.isoformat(), hexid.lower() + ".json")
 
@@ -291,10 +311,15 @@ def collect():
             p = trace_path(day, e["h"])
             if os.path.exists(p):
                 continue
-            try:
-                T = get(f"{FLIGHT}/api/trace?hex={e['h']}")
-            except Exception as ex:
-                log("trace", e["h"], type(ex).__name__, str(ex)[:160])
+            T = None
+            for src in ("flighthome", "adsb.lol"):
+                try:
+                    T = get(f"{FLIGHT}/api/trace?hex={e['h']}") if src == "flighthome" else adsb_trace(e["h"])
+                    if T.get("pts"):
+                        log("trace", e["h"], "from", src, len(T["pts"]), "points"); break
+                except Exception as ex:
+                    log("trace", e["h"], src, type(ex).__name__, str(ex)[:160])
+            if not T:
                 continue
             if not T.get("pts"):
                 log("trace", e["h"], "no points", str(T.get("error", ""))[:160])
