@@ -1,0 +1,6 @@
+2026-11-16T23:41:01+00:00
+day 2026-11-16 7700 landed: ['SWA4325']
+trace ac4ffb HTTPError HTTP Error 502: Bad Gateway
+day 2026-11-15 7700 landed: ['RYR7RJ']
+trace 4cafb4 TimeoutError The read operation timed out
+collect: 0 new tracks
