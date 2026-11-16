@@ -1,6 +1,6 @@
 # Exemplos do robô de redes sociais
 
-Gerado a 16/11/2026 23:11 (hora de Lisboa) com dados reais. **Nada foi publicado.**
+Gerado a 16/11/2026 23:12 (hora de Lisboa) com dados reais. **Nada foi publicado.**
 
 ## SwimHeat — provas da semana
 - **Quando:** segunda-feira 19:00
@@ -55,11 +55,11 @@ Todos los resultados en la app · All results in the app.
 ```
 ⚠️ Avisos meteorológicos na Europa · 16 nov
 
-• Alemanha: 🔴 12 regiãoões · 🟠 147 regiãoões — chuva, vento
-• Espanha: 🟠 11 regiãoões — agitação marítima
-• Eslováquia: 🟠 6 regiãoões — vento
-• Portugal: 🟠 6 regiãoões — agitação marítima
-• Itália: 🟠 3 regiãoões — vento
+• Alemanha: 🔴 12 regiões · 🟠 147 regiões — chuva, vento
+• Espanha: 🟠 11 regiões — agitação marítima
+• Eslováquia: 🟠 6 regiões — vento
+• Portugal: 🟠 6 regiões — agitação marítima
+• Itália: 🟠 3 regiões — vento
 • Polónia: 🟠 1 região — vento
 🌀 AKVAN-26 — alerta laranja (GDACS)
 
@@ -83,7 +83,7 @@ Fontes: MeteoAlarm (EUMETNET, CC BY 4.0), GDACS. Segue sempre as indicações da
 • RYR7RJ (B738) — aterrou em Dublin (DUB) · código 7700 emergência
 • RP-C4166 (A20N) — aterrou em Manila (MNL) · código 7600 falha de rádio
 
-Os pilotos marcam 7700 sempre que precisam de prioridade — muitas vezes por um passageiro doente ou por precaução.
+O código 7700 pede prioridade ao controlo aéreo — por razões médicas, técnicas ou por precaução. Não sabemos a causa de cada caso.
 Yesterday's emergency squawks that ended on the ground · flighthome.app (link na bio)
 
 Dados ADS-B públicos (adsb.lol, ODbL). Sem especulação sobre causas.
