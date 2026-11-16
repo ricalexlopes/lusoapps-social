@@ -21,5 +21,5 @@ jobs:
       - run: |
           git config user.name "lusoapps-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add traces 2>/dev/null || true
+          [ -e traces ] && git add traces || true
           git diff --cached --quiet || (git commit -m "FlightHome tracks" && git pull --rebase -q && git push)
