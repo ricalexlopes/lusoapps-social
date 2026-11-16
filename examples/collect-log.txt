@@ -1,6 +1,8 @@
-2026-11-16T23:41:01+00:00
+2026-11-16T23:43:23+00:00
 day 2026-11-16 7700 landed: ['SWA4325']
-trace ac4ffb HTTPError HTTP Error 502: Bad Gateway
+trace ac4ffb flighthome TimeoutError The read operation timed out
+trace ac4ffb adsb.lol URLError <urlopen error _ssl.c:994: The handshake operation timed out>
 day 2026-11-15 7700 landed: ['RYR7RJ']
-trace 4cafb4 TimeoutError The read operation timed out
+trace 4cafb4 flighthome TimeoutError The read operation timed out
+trace 4cafb4 adsb.lol URLError <urlopen error _ssl.c:994: The handshake operation timed out>
 collect: 0 new tracks
