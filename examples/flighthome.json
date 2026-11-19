@@ -2,7 +2,7 @@
  "brand": "flighthome",
  "kind": "flighthome",
  "when": "todos os dias às 09:00 (só se houver casos)",
- "image": "out/2026-11-15/flighthome.png",
- "text": "✈️ Emergency landings · 15 Nov 2026\n\n• RYR7RJ (B738) squawked 7700 and landed in Dublin (DUB)\n\nSquawk 7700 asks air traffic control for priority — for medical, technical or precautionary reasons. We don't know the cause of each case.\n\n🇵🇹 Aterragens de emergência · 15 nov\n• RYR7RJ (B738) declarou 7700 e aterrou em Dublin (DUB)\nO código 7700 pede prioridade ao controlo aéreo — por razões médicas, técnicas ou por precaução. Não sabemos a causa de cada caso.\n\nFollow flights live · Segue os voos ao vivo: flighthome.app (link in bio)\nPublic ADS-B data: adsb.lol (ODbL).\n\n#FlightHome #aviation #avgeek #squawk7700",
- "note": "7 aviões no registo do dia; 1 com 7700, vistos 2+ vezes e parados a menos de 15 km de um aeroporto. Percurso no mapa: só o primeiro e o último ponto (linha tracejada)."
+ "image": "out/2026-11-18/flighthome.png",
+ "text": "✈️ Squawk 7700 · 18 Nov 2026\n\n• N273LA (DA40) squawked 7700 and was followed to the final approach to Stewart International Airport at 00:55 UTC — landing not confirmed\n\nSquawk 7700 asks air traffic control for priority — for medical, technical or precautionary reasons. We don't know the cause of each case.\n\n🇵🇹 Código 7700 · 18 nov\n• N273LA (DA40) declarou 7700 e foi seguido até à aproximação final a Stewart International Airport às 00:55 UTC — aterragem não confirmada\nO código 7700 pede prioridade ao controlo aéreo — por razões médicas, técnicas ou por precaução. Não sabemos a causa de cada caso.\n\nFollow flights live · Segue os voos ao vivo: flighthome.app (link in bio)\nDados: adsb.lol (ODbL).\n\n#FlightHome #aviation #avgeek #squawk7700",
+ "note": "2 aviões no registo do dia; 1 com 7700, vistos 2+ vezes e terminados a menos de 15 km de um aeroporto (1 com sinal perdido na aproximação = aterragem não confirmada). Casos militares só entram depois do fim. Percurso no mapa: só o primeiro e o último ponto (linha tracejada). Fonte: Dados: adsb.lol (ODbL)."
 }

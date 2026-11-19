@@ -2,7 +2,7 @@
  "brand": "flighthome",
  "kind": "flighthome-today",
  "when": "todos os dias às 09:00 (só se houver casos)",
- "image": "out/2026-11-16/flighthome.png",
- "text": "✈️ Emergency landings · 16 Nov 2026\n\n• SWA4325 (B38M) squawked 7700 and landed in Las Vegas (LAS)\n\nSquawk 7700 asks air traffic control for priority — for medical, technical or precautionary reasons. We don't know the cause of each case.\n\n🇵🇹 Aterragens de emergência · 16 nov\n• SWA4325 (B38M) declarou 7700 e aterrou em Las Vegas (LAS)\nO código 7700 pede prioridade ao controlo aéreo — por razões médicas, técnicas ou por precaução. Não sabemos a causa de cada caso.\n\nFollow flights live · Segue os voos ao vivo: flighthome.app (link in bio)\nPublic ADS-B data: adsb.lol (ODbL).\n\n#FlightHome #aviation #avgeek #squawk7700",
- "note": "9 aviões no registo do dia; 1 com 7700, vistos 2+ vezes e parados a menos de 15 km de um aeroporto. Percurso no mapa: só o primeiro e o último ponto (linha tracejada)."
+ "image": "out/2026-11-19/flighthome.png",
+ "text": "✈️ Emergency landings · 19 Nov 2026\n\n• SHADO76 (C30J) squawked 7700 and landed in Albuquerque (ABQ)\n\nSquawk 7700 asks air traffic control for priority — for medical, technical or precautionary reasons. We don't know the cause of each case.\n\n🇵🇹 Aterragens de emergência · 19 nov\n• SHADO76 (C30J) declarou 7700 e aterrou em Albuquerque (ABQ)\nO código 7700 pede prioridade ao controlo aéreo — por razões médicas, técnicas ou por precaução. Não sabemos a causa de cada caso.\n\nFollow flights live · Segue os voos ao vivo: flighthome.app (link in bio)\nDados: adsb.lol (ODbL).\n\n#FlightHome #aviation #avgeek #squawk7700",
+ "note": "1 aviões no registo do dia; 1 com 7700, vistos 2+ vezes e terminados a menos de 15 km de um aeroporto (0 com sinal perdido na aproximação = aterragem não confirmada). Casos militares só entram depois do fim. Percurso no mapa: só o primeiro e o último ponto (linha tracejada). Fonte: Dados: adsb.lol (ODbL)."
 }
