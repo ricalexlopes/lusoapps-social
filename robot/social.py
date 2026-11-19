@@ -252,20 +252,25 @@ def nearest_airport(la, lo, maxkm=15):
     best = min(airports(), key=lambda a: km(la, lo, a[5], a[6]))
     return best if km(la, lo, best[5], best[6]) <= maxkm else None
 
-def landed_7700(day):
-    """Entries of the FlightHome emergency log for a UTC day that squawked 7700, were seen 2+ times and stopped on the
-    ground near a known airport. 7600 (radio failure) and 7500 are never posted."""
+def landed_7700(day, now=None):
+    """Entries of the FlightHome emergency log for a UTC day that squawked 7700, were seen 2+ times and ended near a
+    known airport or base: e["_end"] = "landed" (stopped on the ground there) or "lost" (signal lost low on the approach,
+    like WARLOR52 at RAF Coningsby: landing NOT confirmed). Cases seen in the last hour are left out (maybe not over yet:
+    military cases are only posted after the end). 7600 (radio failure) and 7500 are never posted."""
     L = get(f"{FLIGHT}/api/emglog?day={day.isoformat()}").get("list", [])
+    now_ms = (now or dt.datetime.now(dt.timezone.utc)).timestamp() * 1000
     out = []
     for e in L:
         if e.get("q") != "7700" and "7700" not in (e.get("qs") or []):
             continue
         last = e.get("last") or {}
-        on_ground = last.get("g") == 1 or ((last.get("al") or 99999) <= 300 and (last.get("s") or 999) <= 60)
-        if not on_ground or e.get("n", 0) < 2 or last.get("la") is None:
+        if e.get("n", 0) < 2 or last.get("la") is None or now_ms - (last.get("t") or 0) < 3600e3:
             continue
-        ap = nearest_airport(last["la"], last["lo"])
+        on_ground = last.get("g") == 1 or ((last.get("al") or 99999) <= 300 and (last.get("s") or 999) <= 60)
+        low = (last.get("al") if last.get("al") is not None else 99999) <= 2000  # ft: the signal is often lost near the ground
+        ap = nearest_airport(last["la"], last["lo"]) if on_ground else (nearest_airport(last["la"], last["lo"], 20) if low else None)
         if ap:
+            e["_end"] = "landed" if on_ground else "lost"
             out.append((e, ap))
     return out, len(L)
 
@@ -368,52 +373,96 @@ def ac_name(e, T):
         return " ".join(x if any(ch.isdigit() for ch in x) else x.capitalize() for x in w)
     return e.get("t") or ""
 
-def flighthome(day):
-    """Post about `day` (UTC): aircraft that squawked 7700 and landed."""
-    landed, total = landed_7700(day)
+CREDIT = {"adsb.lol": "adsb.lol (ODbL)", "flyitaly": "FlyItalyADSB (CC BY-SA 4.0)"}
+
+def credit_line(srcs):
+    srcs = [x for x in ("adsb.lol", "flyitaly") if x in srcs] or ["adsb.lol"]
+    return "Dados: " + " / ".join(CREDIT[x] for x in srcs)
+
+def lost_leg(T):
+    """Signal-lost case: the last airborne stretch of the track and the time of the last point."""
+    pts, t0 = (T or {}).get("pts") or [], (T or {}).get("from", 0)
+    if len(pts) < 2:
+        return None, None
+    si = len(pts) - 1
+    while si > 0 and pts[si - 1][3] != -1 and (pts[si][0] - pts[si - 1][0]) < 1800:
+        si -= 1
+    leg = [(p[1], p[2]) for p in pts[si:]]
+    return leg, dt.datetime.fromtimestamp(t0 + pts[-1][0], dt.timezone.utc)
+
+def flighthome(day, now=None):
+    """Post about `day` (UTC): aircraft that squawked 7700 and landed, or were followed until the signal was lost on the
+    approach (written as "landing not confirmed" — never "landed safely")."""
+    landed, total = landed_7700(day, now)
     if not landed:
         return None
-    items = []
+    items, srcs = [], set()
     for e, ap in landed:
-        T = None
+        lost = e.get("_end") == "lost"
+        leg = when = None
+        T, isrc = None, None
+        # 1) the points FlightHome saved while the aircraft squawked 7700 (any source), 2) the track saved by `collect`
+        own = {"pts": e.get("pts") or [], "from": 0}
         p = trace_path(day, e["h"])
-        if os.path.exists(p):
-            T = json.load(open(p))
-        leg, when = flight_leg(T, (e.get("last") or {}).get("t", 0)) if T else (None, None)
+        saved = json.load(open(p)) if os.path.exists(p) else None
+        for cand, src in ((own, e.get("src") or ["adsb.lol"]), (saved, ["adsb.lol"])):
+            if not cand or len(cand.get("pts") or []) < 3:
+                continue
+            leg, when = lost_leg(cand) if lost else flight_leg(cand, (e.get("last") or {}).get("t", 0))
+            if leg:
+                T, isrc = cand, src; break
+        isrc = isrc or e.get("src") or ["adsb.lol"]
+        srcs.update(isrc)
+        if lost and not when:
+            when = dt.datetime.fromtimestamp((e.get("last") or {}).get("t", 0) / 1000, dt.timezone.utc)
         who = e.get("f") or e.get("r") or e["h"].upper()
-        items.append({"who": who, "type": ac_name(e, T), "code": e.get("t", ""), "ap": ap, "leg": leg, "when": when, "e": e})
-    items.sort(key=lambda x: (x["leg"] is None, x["when"] or dt.datetime.max.replace(tzinfo=dt.timezone.utc)))
+        items.append({"who": who, "type": ac_name(e, saved or T), "code": e.get("t", ""), "ap": ap, "leg": leg, "when": when, "e": e, "lost": lost, "src": isrc})
+    items.sort(key=lambda x: (x["lost"], x["leg"] is None, x["when"] or dt.datetime.max.replace(tzinfo=dt.timezone.utc)))
+    any_landed = any(not x["lost"] for x in items)
     head = f"{day.day} {MON_EN[day.month-1]} {day.year}"
-    t = [f"✈️ Emergency landings · {head}", ""]
+    apn = lambda x: f"{x['ap'][3]} ({x['ap'][1] or x['ap'][0]})"
+    credit = credit_line(srcs)
+    t = [f"✈️ {'Emergency landings' if any_landed else 'Squawk 7700'} · {head}", ""]
     for x in items[:8]:
         at = f" at {x['when'].strftime('%H:%M')} UTC" if x["when"] else ""
         typ = f" ({x['type']})" if x["type"] else ""
-        t.append(f"• {x['who']}{typ} squawked 7700 and landed{at} in {x['ap'][3]} ({x['ap'][1] or x['ap'][0]})")
+        if x["lost"]:
+            t.append(f"• {x['who']}{typ} squawked 7700 and was followed to the final approach to {x['ap'][2]}{at} — landing not confirmed")
+        else:
+            t.append(f"• {x['who']}{typ} squawked 7700 and landed{at} in {apn(x)}")
     if len(items) > 8:
         t.append(f"• + {len(items) - 8} more")
     t += ["", "Squawk 7700 asks air traffic control for priority — for medical, technical or precautionary reasons. We don't know the cause of each case.",
-          "", f"🇵🇹 Aterragens de emergência · {day.day} {MES[day.month-1]}"]
+          "", f"🇵🇹 {'Aterragens de emergência' if any_landed else 'Código 7700'} · {day.day} {MES[day.month-1]}"]
     for x in items[:8]:
         at = f" às {x['when'].strftime('%H:%M')} UTC" if x["when"] else ""
         typ = f" ({x['code']})" if x["code"] else ""
-        t.append(f"• {x['who']}{typ} declarou 7700 e aterrou{at} em {x['ap'][3]} ({x['ap'][1] or x['ap'][0]})")
+        if x["lost"]:
+            t.append(f"• {x['who']}{typ} declarou 7700 e foi seguido até à aproximação final a {x['ap'][2]}{at} — aterragem não confirmada")
+        else:
+            t.append(f"• {x['who']}{typ} declarou 7700 e aterrou{at} em {apn(x)}")
     t += ["O código 7700 pede prioridade ao controlo aéreo — por razões médicas, técnicas ou por precaução. Não sabemos a causa de cada caso.",
           "", "Follow flights live · Segue os voos ao vivo: flighthome.app (link in bio)",
-          "Public ADS-B data: adsb.lol (ODbL).", "", "#FlightHome #aviation #avgeek #squawk7700"]
+          credit + ".", "", "#FlightHome #aviation #avgeek #squawk7700"]
     # map: the first case with a full track (else the first case, first/last log points, dashed)
     x = items[0]
     pts = x["leg"] or [((x["e"].get("first") or {}).get("la"), (x["e"].get("first") or {}).get("lo")),
                        ((x["e"].get("last") or {}).get("la"), (x["e"].get("last") or {}).get("lo"))]
     pts = [p for p in pts if p[0] is not None]
     at = f" at {x['when'].strftime('%H:%M')} UTC" if x["when"] else ""
-    lines = [f"{x['who']}{' (' + x['type'] + ')' if x['type'] else ''} landed{at}",
-             f"in {x['ap'][3]} ({x['ap'][1] or x['ap'][0]}) after squawking 7700",
-             (f"+ {len(items) - 1} more emergency landing{'s' if len(items) > 2 else ''} that day" if len(items) > 1 else
-              "Track from public ADS-B data")]
-    img = cards.flight_map([{"pts": pts, "land": (x["ap"][5], x["ap"][6]), "label": f"{x['who']} · {x['ap'][1] or x['ap'][0]}"}],
-                           f"Emergency landings · {head}", lines, os.path.join(outdir(day), "flighthome.png"))
-    note = (f"{total} aviões no registo do dia; {len(items)} com 7700, vistos 2+ vezes e parados a menos de 15 km de um aeroporto. "
-            f"Percurso no mapa: {'completo' if x['leg'] else 'só o primeiro e o último ponto (linha tracejada)'}.")
+    typ = " (" + x["type"] + ")" if x["type"] else ""
+    if x["lost"]:
+        first = [f"{x['who']}{typ}: followed to final approach{at}", f"at {x['ap'][2]} after squawking 7700 — landing not confirmed"]
+    else:
+        first = [f"{x['who']}{typ} landed{at}", f"in {apn(x)} after squawking 7700"]
+    lines = first + [(f"+ {len(items) - 1} more 7700 case{'s' if len(items) > 2 else ''} that day" if len(items) > 1 else
+                      "Track from public ADS-B data")]
+    img = cards.flight_map([{"pts": pts, "land": (x["ap"][5], x["ap"][6]), "label": f"{x['who']} · {x['ap'][1] or x['ap'][0]}", "lost": x["lost"]}],
+                           f"{'Emergency landings' if any_landed else 'Squawk 7700'} · {head}", lines, os.path.join(outdir(day), "flighthome.png"), credit_line(x["src"]))  # the image credits the source of the track it shows
+    nl = sum(1 for i in items if i["lost"])
+    note = (f"{total} aviões no registo do dia; {len(items)} com 7700, vistos 2+ vezes e terminados a menos de 15 km de um aeroporto "
+            f"({nl} com sinal perdido na aproximação = aterragem não confirmada). Casos militares só entram depois do fim. "
+            f"Percurso no mapa: {'completo' if x['leg'] else 'só o primeiro e o último ponto (linha tracejada)'}. Fonte: {credit}.")
     return {"brand": "flighthome", "kind": "flighthome", "when": "todos os dias às 09:00 (só se houver casos)",
             "image": rel(img), "text": "\n".join(t), "note": note}
 

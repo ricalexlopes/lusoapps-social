@@ -22,4 +22,5 @@ jobs:
           git config user.name "lusoapps-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           [ -e traces ] && git add traces || true
+          git add examples/collect-log.txt || true   # the log too, so failures can be seen in the repository
           git diff --cached --quiet || (git commit -m "FlightHome tracks" && git pull --rebase -q && git push)

@@ -30,7 +30,7 @@ def _fig(bg):
     fig.patch.set_facecolor(bg)
     return fig
 
-def flight_map(tracks, title, lines, out_path):
+def flight_map(tracks, title, lines, out_path, credit="Dados: adsb.lol (ODbL)"):
     """tracks: [{'pts': [(lat, lon), ...], 'land': (lat, lon), 'label': 'RYR7RJ · DUB'}]  (pts may be just the first and last point)
     title: big headline, lines: 1-3 short lines under the map."""
     land, borders = _outlines()
@@ -75,7 +75,8 @@ def flight_map(tracks, title, lines, out_path):
         ax.plot(xs, ys, color=FH["orange"], linewidth=4 if full else 3, linestyle="-" if full else (0, (4, 3)),
                 solid_capstyle="round", zorder=4)
         ax.plot(xs[0], ys[0], "o", color="white", markeredgecolor=FH["orange"], markeredgewidth=3, markersize=11, zorder=5)
-        ax.plot(t["land"][1], t["land"][0], "o", color=FH["green"], markeredgecolor="white", markeredgewidth=3, markersize=20, zorder=6)
+        # green = landed there; grey = signal lost on the approach (landing not confirmed)
+        ax.plot(t["land"][1], t["land"][0], "o", color="#93A4B8" if t.get("lost") else FH["green"], markeredgecolor="white", markeredgewidth=3, markersize=20, zorder=6)
         ax.annotate(t["label"], (t["land"][1], t["land"][0]), xytext=(14, 14), textcoords="offset points", fontsize=17,
                     fontweight="bold", color=FH["navy"], zorder=7,
                     bbox=dict(boxstyle="round,pad=0.35", fc="white", ec=FH["line"]))
@@ -87,7 +88,7 @@ def flight_map(tracks, title, lines, out_path):
                 fontweight="bold" if i == 0 else "normal", va="top")
         y -= 0.26 if i == 0 else 0.21
     ft.text(0, 0.02, "flighthome.app", color=FH["orange"], fontsize=20, fontweight="bold", va="bottom")
-    ft.text(1, 0.02, "ADS-B: adsb.lol (ODbL) · Map: Natural Earth", color=FH["muted"], fontsize=11, ha="right", va="bottom")
+    ft.text(1, 0.02, credit + " · Map: Natural Earth", color=FH["muted"], fontsize=11, ha="right", va="bottom")
     fig.savefig(out_path, dpi=DPI, facecolor=fig.get_facecolor())
     plt.close(fig)
     return out_path
