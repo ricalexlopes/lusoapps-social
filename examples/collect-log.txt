@@ -1,5 +1,8 @@
-2026-11-19T20:32:42+00:00
-day 2026-11-19 7700 landed: ['SHADO76', 'APOLLO11', 'SVL45', 'BBQ563']
+2026-11-20T03:10:58+00:00
+day 2026-11-20 7700 landed: ['USC59']
+trace a3f79c flighthome HTTPError HTTP Error 502: Bad Gateway
+trace a3f79c adsb.lol HTTPError HTTP Error 403: Forbidden
+day 2026-11-19 7700 landed: ['SHADO76', 'APOLLO11', 'SVL45', 'BBQ563', 'SHK411']
 trace ae54c9 flighthome HTTPError HTTP Error 502: Bad Gateway
 trace ae54c9 adsb.lol HTTPError HTTP Error 403: Forbidden
 trace 43caed flighthome HTTPError HTTP Error 502: Bad Gateway
@@ -8,7 +11,6 @@ trace adf75f flighthome HTTPError HTTP Error 502: Bad Gateway
 trace adf75f adsb.lol HTTPError HTTP Error 403: Forbidden
 trace aaeafd flighthome HTTPError HTTP Error 502: Bad Gateway
 trace aaeafd adsb.lol HTTPError HTTP Error 403: Forbidden
-day 2026-11-18 7700 landed: ['N273LA']
-trace a2b29c flighthome HTTPError HTTP Error 502: Bad Gateway
-trace a2b29c adsb.lol HTTPError HTTP Error 403: Forbidden
+trace ae4fc0 flighthome HTTPError HTTP Error 502: Bad Gateway
+trace ae4fc0 adsb.lol HTTPError HTTP Error 403: Forbidden
 collect: 0 new tracks
