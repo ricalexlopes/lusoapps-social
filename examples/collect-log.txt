@@ -1,6 +1,10 @@
-2026-11-22T23:35:53+00:00
-day 2026-11-22 7700 landed: []
-day 2026-11-21 7700 landed: ['XSR362']
+2026-11-23T07:32:54+00:00
+day 2026-11-23 7700 landed: ['AAL2471']
+trace ad4c2a flighthome HTTPError HTTP Error 502: Bad Gateway
+trace ad4c2a adsb.lol HTTPError HTTP Error 403: Forbidden
+day 2026-11-22 7700 landed: ['XSR362', 'LHX2506']
 trace a413cb flighthome HTTPError HTTP Error 502: Bad Gateway
 trace a413cb adsb.lol HTTPError HTTP Error 403: Forbidden
+trace 3c6525 flighthome HTTPError HTTP Error 502: Bad Gateway
+trace 3c6525 adsb.lol HTTPError HTTP Error 403: Forbidden
 collect: 0 new tracks
