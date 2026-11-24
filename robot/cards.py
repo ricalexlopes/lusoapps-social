@@ -72,8 +72,13 @@ def flight_map(tracks, title, lines, out_path, credit="Dados: adsb.lol (ODbL)"):
     for t in tracks:
         ys = [p[0] for p in t["pts"]]; xs = [p[1] for p in t["pts"]]
         full = len(t["pts"]) > 2
-        ax.plot(xs, ys, color=FH["orange"], linewidth=4 if full else 3, linestyle="-" if full else (0, (4, 3)),
-                solid_capstyle="round", zorder=4)
+        if full and t.get("gap"):
+            # seen track solid; the last stretch to the airport (not seen) dashed
+            ax.plot(xs[:-1], ys[:-1], color=FH["orange"], linewidth=4, solid_capstyle="round", zorder=4)
+            ax.plot(xs[-2:], ys[-2:], color=FH["orange"], linewidth=3, linestyle=(0, (4, 3)), zorder=4)
+        else:
+            ax.plot(xs, ys, color=FH["orange"], linewidth=4 if full else 3, linestyle="-" if full else (0, (4, 3)),
+                    solid_capstyle="round", zorder=4)
         ax.plot(xs[0], ys[0], "o", color="white", markeredgecolor=FH["orange"], markeredgewidth=3, markersize=11, zorder=5)
         # green = landed there; grey = signal lost on the approach (landing not confirmed)
         ax.plot(t["land"][1], t["land"][0], "o", color="#93A4B8" if t.get("lost") else FH["green"], markeredgecolor="white", markeredgewidth=3, markersize=20, zorder=6)

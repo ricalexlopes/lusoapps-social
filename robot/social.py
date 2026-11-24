@@ -373,6 +373,13 @@ def ac_name(e, T):
         return " ".join(x if any(ch.isdigit() for ch in x) else x.capitalize() for x in w)
     return e.get("t") or ""
 
+def _km(a, b):
+    """Distance in km between two (lat, lon) points."""
+    import math
+    la1, lo1, la2, lo2 = map(math.radians, (a[0], a[1], b[0], b[1]))
+    h = math.sin((la2 - la1) / 2) ** 2 + math.cos(la1) * math.cos(la2) * math.sin((lo2 - lo1) / 2) ** 2
+    return 12742 * math.asin(min(1, math.sqrt(h)))
+
 CREDIT = {"adsb.lol": "adsb.lol (ODbL)", "flyitaly": "FlyItalyADSB (CC BY-SA 4.0)"}
 APL_CREDIT = "Data by Airplanes.Live (airplanes.live)"  # their written condition: visible credit with the link
 
@@ -424,6 +431,7 @@ def flighthome(day, now=None):
             # aircraft was SEEN ON THE GROUND there (what the data shows), never an invented landing time
             if len(own["pts"]) >= 2:
                 leg = (lost_leg(own)[0] or []) + [(ap[5], ap[6])]
+                e["_gap"] = True  # the last stretch (to the airport) was not seen: drawn dashed
                 T, isrc = own, e.get("src") or ["adsb.lol"]
             lt = (e.get("last") or {}).get("t")
             seen = dt.datetime.fromtimestamp(lt / 1000, dt.timezone.utc) if lt else None
@@ -462,8 +470,13 @@ def flighthome(day, now=None):
     t += ["O código 7700 pede prioridade ao controlo aéreo — por razões médicas, técnicas ou por precaução. Não sabemos a causa de cada caso.",
           "", "Follow flights live · Segue os voos ao vivo: flighthome.app (link in bio)",
           credit + ".", "", "#FlightHome #aviation #avgeek #squawk7700"]
-    # map: the first case with a full track (else the first case, first/last log points, dashed)
-    x = items[0]
+    # map: the case with the longest track that day (a few hundred metres next to the airport says nothing on a map);
+    # with no track at all, the first case with its first/last log points, dashed
+    def track_km(it):
+        lg = it["leg"] or []
+        return sum(_km(a, b) for a, b in zip(lg, lg[1:]))
+    with_leg = [it for it in items if it["leg"] and len(it["leg"]) >= 3]
+    x = max(with_leg, key=track_km) if with_leg else items[0]
     pts = x["leg"] or [((x["e"].get("first") or {}).get("la"), (x["e"].get("first") or {}).get("lo")),
                        ((x["e"].get("last") or {}).get("la"), (x["e"].get("last") or {}).get("lo"))]
     pts = [p for p in pts if p[0] is not None]
@@ -476,7 +489,7 @@ def flighthome(day, now=None):
                  (f" · seen on the ground at {x['seen'].strftime('%H:%M')} UTC" if x.get("seen") else "")]
     lines = first + [(f"+ {len(items) - 1} more 7700 case{'s' if len(items) > 2 else ''} that day" if len(items) > 1 else
                       "Track from public ADS-B data")]
-    img = cards.flight_map([{"pts": pts, "land": (x["ap"][5], x["ap"][6]), "label": f"{x['who']} · {x['ap'][1] or x['ap'][0]}", "lost": x["lost"]}],
+    img = cards.flight_map([{"pts": pts, "land": (x["ap"][5], x["ap"][6]), "label": f"{x['who']} · {x['ap'][1] or x['ap'][0]}", "lost": x["lost"], "gap": bool(x["e"].get("_gap"))}],
                            f"{'Emergency landings' if any_landed else 'Squawk 7700'} · {head}", lines, os.path.join(outdir(day), "flighthome.png"), credit_line(x["src"]))  # the image credits the source of the track it shows
     nl = sum(1 for i in items if i["lost"])
     note = (f"{total} aviões no registo do dia; {len(items)} com 7700, vistos 2+ vezes e terminados a menos de 15 km de um aeroporto "
