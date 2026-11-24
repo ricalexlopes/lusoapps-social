@@ -1,32 +1,24 @@
 # Exemplos do robô de redes sociais
 
-Gerado a 21/11/2026 09:32 (hora de Lisboa) com dados reais. **Nada foi publicado.**
+Gerado a 24/11/2026 10:29 (hora de Lisboa) com dados reais. **Nada foi publicado.**
 
 ## SwimHeat — provas da semana
 - **Quando:** segunda-feira 19:00
 - **Onde:** Facebook + Instagram
-- **Imagem:** https://lusoapps.com/social/fotos/subaquatica-nadador.jpg ✅
+- **Imagem:** https://lusoapps.com/social/fotos/mariposa-prova.jpg ✅
 
-![imagem](https://lusoapps.com/social/fotos/subaquatica-nadador.jpg)
+![imagem](https://lusoapps.com/social/fotos/mariposa-prova.jpg)
 
 ```
-🏊 Esta semana no SwimHeat · seg 16–dom 22 nov
+🏊 Esta semana no SwimHeat · seg 23–dom 29 nov
 
 🇵🇹 Portugal
-• sex 20–dom 22 nov · Braga — Campeonato Territorial JUV, JUN e SEN / Torneio de Fundo de Juvenis (25m)
-• sáb 21–dom 22 nov · Bragança — Campeonatos Regionais de Juv., Jun. e Sen | PP INF | Torregri I Cadetes A (25m)
-• sáb 21–dom 22 nov · Cantanhede — Campeonato Regional de Juvenis, Juniores e Seniores - Piscina Curta (25m)
-• sáb 21 nov · Castelo Branco — Campeonatos Nacionais Universitarios Natação PC (25m)
-• sáb 21–dom 22 nov · Guarda — Campeonato Regional ANICentro e Preparação de Infantis (25m)
-• sáb 21–dom 22 nov · Leiria — Campeonato Distrital PC + TD Fundo Juv + TNCompleto Inf (25m)
-• sáb 21–dom 22 nov · Sines — CR Juvenis e Absolutos & TR Fundo Juvenis & TN Completo Infantis (25m)
-• sáb 21–dom 22 nov · Vila Real de Santo António — Campeonato Regional de Juvenis, Juniores, Seniores e Adaptada (25m)
+• sex 27 nov · Mealhada — Campeonato Nacional Clubes 3ª Divisão (25m)
+• sáb 28–dom 29 nov · Mealhada — Campeonato Nacional Clubes 2ª Divisão (25m)
+• dom 29 nov · Coruche — 1º Torregi de Cadetes- 2ºTorneio de Cadetes (25m)
 
 🇪🇸 España
-• sáb 21 nov · Logroño — XXVI Trofeo Ciudad de Logroño 26-27 (25m)
-• dom 22 nov · Barcelona — Campionat de Catalunya Universitari (25m)
-
-⏰ dom 22 nov: último dia para os mínimos dos Zonais de Juvenis
+• sáb 28–dom 29 nov · Gijón — V Copa de Clubes de Asturias Absoluta (25m)
 
 Segue o teu nadador ao vivo: provas, tempos, lugares e mínimos no telemóvel. Grátis.
 Sigue a tu nadador en directo · Follow your swimmer live.
@@ -38,19 +30,19 @@ Sigue a tu nadador en directo · Follow your swimmer live.
 ## SwimHeat — resumo de domingo
 - **Quando:** domingo 21:00
 - **Onde:** Facebook + Instagram
-- **Imagem:** https://lusoapps.com/social/fotos/livres-de-cima.jpg ✅
+- **Imagem:** https://lusoapps.com/social/fotos/mariposa-escuro.jpg ✅
 - **Nota:** Só números, nunca nomes. 'Melhor tempo da época' compara com os tempos desta época que o SwimHeat tem (só Portugal).
 
-![imagem](https://lusoapps.com/social/fotos/livres-de-cima.jpg)
+![imagem](https://lusoapps.com/social/fotos/mariposa-escuro.jpg)
 
 ```
-📊 O fim de semana em números · sáb 14–dom 15 nov
+📊 O fim de semana em números · sáb 21–dom 22 nov
 
-🇵🇹 4 provas (Coimbra, Peso da Régua, Ponte da Barca, Tomar)
-   432 nadadores · 43 clubes · 2021 tempos individuais
-   ⚡ 237 vezes um nadador bateu o seu melhor tempo da época
-🇪🇸 5 competiciones (Barcelona, Navia, Vilafranca del Penedès, Águilas)
-   759 nadadores · 57 clubes · 1316 tiempos individuales
+🇵🇹 8 provas (Braga, Bragança, Cantanhede, Castelo Branco, Guarda, Leiria, Sines, Vila Real de Santo António)
+   1224 nadadores · 95 clubes · 5292 tempos individuais
+   ⚡ 1026 vezes um nadador bateu o seu melhor tempo da época
+🇪🇸 4 competiciones (Barcelona, Logroño, Oviedo, Águilas)
+   1188 nadadores · 62 clubes · 2531 tiempos individuales
 
 Todos os resultados, parciais e recordes pessoais na app. Grátis.
 Todos los resultados en la app · All results in the app.
@@ -62,32 +54,25 @@ Todos los resultados en la app · All results in the app.
 ## StormHome — avisos
 - **Quando:** todos os dias às 08:00 (só se houver laranja/vermelho ou ciclone)
 - **Onde:** Facebook + Instagram
-- **Imagem:** out/2026-11-21/stormhome.png
+- **Imagem:** out/2026-11-24/stormhome.png
+- **Nota:** 3 países não responderam nesta leitura.
 
-![imagem](../out/2026-11-21/stormhome.png)
+![imagem](../out/2026-11-24/stormhome.png)
 
 ```
-⚠️ Severe weather warnings in Europe · 21 Nov
+⚠️ Severe weather warnings in Europe · 24 Nov
 
-• Portugal: 🔴 3 red · 🟠 8 orange — rain
-• Finland: 🟠 6 orange — coastal, wind
-• Italy: 🟠 6 orange — snow/ice, thunderstorms, wind
-• Bosnia: 🟠 4 orange — wind
+• Italy: 🟠 6 orange — rain, thunderstorms, wind
+• Montenegro: 🟠 3 orange — wind
 • Spain: 🟠 3 orange — coastal
-• France: 🟠 1 orange — flooding
-• Germany: 🟠 1 orange — wind
-• Poland: 🟠 1 orange — wind
+• Croatia: 🟠 1 orange — rain, wind
 (number of regions with a warning)
 
 🇵🇹 Avisos laranja e vermelhos na Europa hoje:
-• Portugal: 🔴 3 · 🟠 8 — chuva
-• Finlândia: 🟠 6 — agitação marítima, vento
-• Itália: 🟠 6 — neve/gelo, trovoada, vento
-• Bósnia: 🟠 4 — vento
+• Itália: 🟠 6 — chuva, trovoada, vento
+• Montenegro: 🟠 3 — vento
 • Espanha: 🟠 3 — agitação marítima
-• França: 🟠 1 — cheias
-• Alemanha: 🟠 1 — vento
-• Polónia: 🟠 1 — vento
+• Croácia: 🟠 1 — chuva, vento
 
 Official warnings on a live map, alerts for your area and your trip: stormhome.app (link in bio)
 Avisos oficiais no mapa e alertas para a tua zona e para a tua viagem.
@@ -97,31 +82,27 @@ Sources: MeteoAlarm (EUMETNET, CC BY 4.0), GDACS. Always follow your local autho
 #StormHome #weather #severeweather #meteo
 ```
 
-## FlightHome — aterragens de emergência (7700) de 2026-11-20
+## FlightHome — aterragens de emergência (7700) de 2026-11-23
 - **Quando:** todos os dias às 09:00 (só se houver casos)
 - **Onde:** Facebook + Instagram
-- **Imagem:** out/2026-11-20/flighthome.png
-- **Nota:** 20 aviões no registo do dia; 5 com 7700, vistos 2+ vezes e terminados a menos de 15 km de um aeroporto (3 com sinal perdido na aproximação = aterragem não confirmada). Casos militares só entram depois do fim. Percurso no mapa: completo. Fonte: Dados: adsb.lol (ODbL) / FlyItalyADSB (CC BY-SA 4.0).
+- **Imagem:** out/2026-11-23/flighthome.png
+- **Nota:** 23 aviões no registo do dia; 3 com 7700, vistos 2+ vezes e terminados a menos de 15 km de um aeroporto (1 com sinal perdido na aproximação = aterragem não confirmada). Casos militares só entram depois do fim. Percurso no mapa: só o primeiro e o último ponto (linha tracejada). Fonte: Dados: adsb.lol (ODbL) / FlyItalyADSB (CC BY-SA 4.0).
 
-![imagem](../out/2026-11-20/flighthome.png)
+![imagem](../out/2026-11-23/flighthome.png)
 
 ```
-✈️ Emergency landings · 20 Nov 2026
+✈️ Emergency landings · 23 Nov 2026
 
-• USC59 (LJ35) squawked 7700 and landed at 01:35 UTC in Columbus (LCK)
-• EZY27CF (A320) squawked 7700 and landed at 19:12 UTC in Amsterdam (AMS)
-• SRD224B (BE30) squawked 7700 and was followed to the final approach to Humberside Airport at 12:54 UTC — landing not confirmed
-• FJGNB (SHRK) squawked 7700 and was followed to the final approach to Grenoble-Isère Airport at 15:30 UTC — landing not confirmed
-• N79172 (C172) squawked 7700 and was followed to the final approach to La Crosse Municipal Airport at 16:35 UTC — landing not confirmed
+• NHZ790 (EC75) squawked 7700 and landed in Aberdeen (ABZ)
+• USC59 (LJ35) squawked 7700 and landed in Columbus (LCK)
+• AAL2471 (B738) squawked 7700 and was followed to the final approach to Cibao International Airport at 00:19 UTC — landing not confirmed
 
 Squawk 7700 asks air traffic control for priority — for medical, technical or precautionary reasons. We don't know the cause of each case.
 
-🇵🇹 Aterragens de emergência · 20 nov
-• USC59 (LJ35) declarou 7700 e aterrou às 01:35 UTC em Columbus (LCK)
-• EZY27CF (A320) declarou 7700 e aterrou às 19:12 UTC em Amsterdam (AMS)
-• SRD224B (BE30) declarou 7700 e foi seguido até à aproximação final a Humberside Airport às 12:54 UTC — aterragem não confirmada
-• FJGNB (SHRK) declarou 7700 e foi seguido até à aproximação final a Grenoble-Isère Airport às 15:30 UTC — aterragem não confirmada
-• N79172 (C172) declarou 7700 e foi seguido até à aproximação final a La Crosse Municipal Airport às 16:35 UTC — aterragem não confirmada
+🇵🇹 Aterragens de emergência · 23 nov
+• NHZ790 (EC75) declarou 7700 e aterrou em Aberdeen (ABZ)
+• USC59 (LJ35) declarou 7700 e aterrou em Columbus (LCK)
+• AAL2471 (B738) declarou 7700 e foi seguido até à aproximação final a Cibao International Airport às 00:19 UTC — aterragem não confirmada
 O código 7700 pede prioridade ao controlo aéreo — por razões médicas, técnicas ou por precaução. Não sabemos a causa de cada caso.
 
 Follow flights live · Segue os voos ao vivo: flighthome.app (link in bio)
@@ -130,5 +111,27 @@ Dados: adsb.lol (ODbL) / FlyItalyADSB (CC BY-SA 4.0).
 #FlightHome #aviation #avgeek #squawk7700
 ```
 
-## FlightHome — aterragens de emergência (7700) de hoje, 2026-11-21 (até agora)
-_Hoje não publicaria nada (sem conteúdo para este tipo de publicação)._
+## FlightHome — aterragens de emergência (7700) de hoje, 2026-11-24 (até agora)
+- **Quando:** todos os dias às 09:00 (só se houver casos)
+- **Onde:** Facebook + Instagram
+- **Imagem:** out/2026-11-24/flighthome.png
+- **Nota:** 10 aviões no registo do dia; 1 com 7700, vistos 2+ vezes e terminados a menos de 15 km de um aeroporto (0 com sinal perdido na aproximação = aterragem não confirmada). Casos militares só entram depois do fim. Percurso no mapa: completo. Fonte: Dados: adsb.lol (ODbL) / FlyItalyADSB (CC BY-SA 4.0).
+
+![imagem](../out/2026-11-24/flighthome.png)
+
+```
+✈️ Emergency landings · 24 Nov 2026
+
+• RCH9202 (C17) squawked 7700 and landed at 06:41 UTC in Mildenhall (MHZ)
+
+Squawk 7700 asks air traffic control for priority — for medical, technical or precautionary reasons. We don't know the cause of each case.
+
+🇵🇹 Aterragens de emergência · 24 nov
+• RCH9202 (C17) declarou 7700 e aterrou às 06:41 UTC em Mildenhall (MHZ)
+O código 7700 pede prioridade ao controlo aéreo — por razões médicas, técnicas ou por precaução. Não sabemos a causa de cada caso.
+
+Follow flights live · Segue os voos ao vivo: flighthome.app (link in bio)
+Dados: adsb.lol (ODbL) / FlyItalyADSB (CC BY-SA 4.0).
+
+#FlightHome #aviation #avgeek #squawk7700
+```
