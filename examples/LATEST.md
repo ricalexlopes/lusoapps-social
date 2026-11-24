@@ -1,6 +1,6 @@
 # Exemplos do robô de redes sociais
 
-Gerado a 24/11/2026 10:29 (hora de Lisboa) com dados reais. **Nada foi publicado.**
+Gerado a 24/11/2026 10:33 (hora de Lisboa) com dados reais. **Nada foi publicado.**
 
 ## SwimHeat — provas da semana
 - **Quando:** segunda-feira 19:00
@@ -55,7 +55,6 @@ Todos los resultados en la app · All results in the app.
 - **Quando:** todos os dias às 08:00 (só se houver laranja/vermelho ou ciclone)
 - **Onde:** Facebook + Instagram
 - **Imagem:** out/2026-11-24/stormhome.png
-- **Nota:** 3 países não responderam nesta leitura.
 
 ![imagem](../out/2026-11-24/stormhome.png)
 
@@ -86,22 +85,22 @@ Sources: MeteoAlarm (EUMETNET, CC BY 4.0), GDACS. Always follow your local autho
 - **Quando:** todos os dias às 09:00 (só se houver casos)
 - **Onde:** Facebook + Instagram
 - **Imagem:** out/2026-11-23/flighthome.png
-- **Nota:** 23 aviões no registo do dia; 3 com 7700, vistos 2+ vezes e terminados a menos de 15 km de um aeroporto (1 com sinal perdido na aproximação = aterragem não confirmada). Casos militares só entram depois do fim. Percurso no mapa: só o primeiro e o último ponto (linha tracejada). Fonte: Dados: adsb.lol (ODbL) / FlyItalyADSB (CC BY-SA 4.0).
+- **Nota:** 23 aviões no registo do dia; 3 com 7700, vistos 2+ vezes e terminados a menos de 15 km de um aeroporto (1 com sinal perdido na aproximação = aterragem não confirmada). Casos militares só entram depois do fim. Percurso no mapa: completo. Fonte: Dados: adsb.lol (ODbL) / FlyItalyADSB (CC BY-SA 4.0).
 
 ![imagem](../out/2026-11-23/flighthome.png)
 
 ```
 ✈️ Emergency landings · 23 Nov 2026
 
-• NHZ790 (EC75) squawked 7700 and landed in Aberdeen (ABZ)
-• USC59 (LJ35) squawked 7700 and landed in Columbus (LCK)
+• NHZ790 (EC75) squawked 7700 and landed in Aberdeen (ABZ) — seen on the ground at 11:32 UTC
+• USC59 (LJ35) squawked 7700 and landed in Columbus (LCK) — seen on the ground at 18:33 UTC
 • AAL2471 (B738) squawked 7700 and was followed to the final approach to Cibao International Airport at 00:19 UTC — landing not confirmed
 
 Squawk 7700 asks air traffic control for priority — for medical, technical or precautionary reasons. We don't know the cause of each case.
 
 🇵🇹 Aterragens de emergência · 23 nov
-• NHZ790 (EC75) declarou 7700 e aterrou em Aberdeen (ABZ)
-• USC59 (LJ35) declarou 7700 e aterrou em Columbus (LCK)
+• NHZ790 (EC75) declarou 7700 e aterrou em Aberdeen (ABZ) — visto no chão às 11:32 UTC
+• USC59 (LJ35) declarou 7700 e aterrou em Columbus (LCK) — visto no chão às 18:33 UTC
 • AAL2471 (B738) declarou 7700 e foi seguido até à aproximação final a Cibao International Airport às 00:19 UTC — aterragem não confirmada
 O código 7700 pede prioridade ao controlo aéreo — por razões médicas, técnicas ou por precaução. Não sabemos a causa de cada caso.
 
