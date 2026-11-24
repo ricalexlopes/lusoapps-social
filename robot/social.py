@@ -417,13 +417,23 @@ def flighthome(day, now=None):
             leg, when = lost_leg(cand) if lost else flight_leg(cand, (e.get("last") or {}).get("t", 0))
             if leg:
                 T, isrc = cand, src; break
+        seen = None
+        if not lost and not when:
+            # landed, but no touchdown in the track (often the pilot switches off 7700 before landing, and FlightHome
+            # only keeps points while 7700 is on): use the track there is, join it to the airport, and give the time the
+            # aircraft was SEEN ON THE GROUND there (what the data shows), never an invented landing time
+            if len(own["pts"]) >= 2:
+                leg = (lost_leg(own)[0] or []) + [(ap[5], ap[6])]
+                T, isrc = own, e.get("src") or ["adsb.lol"]
+            lt = (e.get("last") or {}).get("t")
+            seen = dt.datetime.fromtimestamp(lt / 1000, dt.timezone.utc) if lt else None
         isrc = isrc or e.get("src") or ["adsb.lol"]
         srcs.update(isrc)
         if lost and not when:
             when = dt.datetime.fromtimestamp((e.get("last") or {}).get("t", 0) / 1000, dt.timezone.utc)
         who = e.get("f") or e.get("r") or e["h"].upper()
-        items.append({"who": who, "type": ac_name(e, saved or T), "code": e.get("t", ""), "ap": ap, "leg": leg, "when": when, "e": e, "lost": lost, "src": isrc})
-    items.sort(key=lambda x: (x["lost"], x["leg"] is None, x["when"] or dt.datetime.max.replace(tzinfo=dt.timezone.utc)))
+        items.append({"who": who, "type": ac_name(e, saved or T), "code": e.get("t", ""), "ap": ap, "leg": leg, "when": when, "seen": seen, "e": e, "lost": lost, "src": isrc})
+    items.sort(key=lambda x: (x["lost"], x["leg"] is None, x["when"] or x["seen"] or dt.datetime.max.replace(tzinfo=dt.timezone.utc)))
     any_landed = any(not x["lost"] for x in items)
     head = f"{day.day} {MON_EN[day.month-1]} {day.year}"
     apn = lambda x: f"{x['ap'][3]} ({x['ap'][1] or x['ap'][0]})"
@@ -435,7 +445,8 @@ def flighthome(day, now=None):
         if x["lost"]:
             t.append(f"• {x['who']}{typ} squawked 7700 and was followed to the final approach to {x['ap'][2]}{at} — landing not confirmed")
         else:
-            t.append(f"• {x['who']}{typ} squawked 7700 and landed{at} in {apn(x)}")
+            seen = f" — seen on the ground at {x['seen'].strftime('%H:%M')} UTC" if x.get("seen") else ""
+            t.append(f"• {x['who']}{typ} squawked 7700 and landed{at} in {apn(x)}{seen}")
     if len(items) > 8:
         t.append(f"• + {len(items) - 8} more")
     t += ["", "Squawk 7700 asks air traffic control for priority — for medical, technical or precautionary reasons. We don't know the cause of each case.",
@@ -446,7 +457,8 @@ def flighthome(day, now=None):
         if x["lost"]:
             t.append(f"• {x['who']}{typ} declarou 7700 e foi seguido até à aproximação final a {x['ap'][2]}{at} — aterragem não confirmada")
         else:
-            t.append(f"• {x['who']}{typ} declarou 7700 e aterrou{at} em {apn(x)}")
+            seen = f" — visto no chão às {x['seen'].strftime('%H:%M')} UTC" if x.get("seen") else ""
+            t.append(f"• {x['who']}{typ} declarou 7700 e aterrou{at} em {apn(x)}{seen}")
     t += ["O código 7700 pede prioridade ao controlo aéreo — por razões médicas, técnicas ou por precaução. Não sabemos a causa de cada caso.",
           "", "Follow flights live · Segue os voos ao vivo: flighthome.app (link in bio)",
           credit + ".", "", "#FlightHome #aviation #avgeek #squawk7700"]
@@ -460,7 +472,8 @@ def flighthome(day, now=None):
     if x["lost"]:
         first = [f"{x['who']}{typ}: followed to final approach{at}", f"at {x['ap'][2]} after squawking 7700 — landing not confirmed"]
     else:
-        first = [f"{x['who']}{typ} landed{at}", f"in {apn(x)} after squawking 7700"]
+        first = [f"{x['who']}{typ} landed{at}", f"in {apn(x)} after squawking 7700" +
+                 (f" · seen on the ground at {x['seen'].strftime('%H:%M')} UTC" if x.get("seen") else "")]
     lines = first + [(f"+ {len(items) - 1} more 7700 case{'s' if len(items) > 2 else ''} that day" if len(items) > 1 else
                       "Track from public ADS-B data")]
     img = cards.flight_map([{"pts": pts, "land": (x["ap"][5], x["ap"][6]), "label": f"{x['who']} · {x['ap'][1] or x['ap'][0]}", "lost": x["lost"]}],
