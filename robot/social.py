@@ -374,10 +374,16 @@ def ac_name(e, T):
     return e.get("t") or ""
 
 CREDIT = {"adsb.lol": "adsb.lol (ODbL)", "flyitaly": "FlyItalyADSB (CC BY-SA 4.0)"}
+APL_CREDIT = "Data by Airplanes.Live (airplanes.live)"  # their written condition: visible credit with the link
 
 def credit_line(srcs):
-    srcs = [x for x in ("adsb.lol", "flyitaly") if x in srcs] or ["adsb.lol"]
-    return "Dados: " + " / ".join(CREDIT[x] for x in srcs)
+    """Credit for the sources used: airplanes.live (paid, our main source), adsb.lol, FlyItalyADSB."""
+    srcs = set(srcs or [])
+    parts = [APL_CREDIT] if "airplanes.live" in srcs else []
+    rest = [x for x in ("adsb.lol", "flyitaly") if x in srcs]
+    if rest or not parts:
+        parts.append("Dados: " + " / ".join(CREDIT[x] for x in (rest or ["adsb.lol"])))
+    return " · ".join(parts)
 
 def lost_leg(T):
     """Signal-lost case: the last airborne stretch of the track and the time of the last point."""

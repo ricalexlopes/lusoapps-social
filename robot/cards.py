@@ -88,7 +88,14 @@ def flight_map(tracks, title, lines, out_path, credit="Dados: adsb.lol (ODbL)"):
                 fontweight="bold" if i == 0 else "normal", va="top")
         y -= 0.26 if i == 0 else 0.21
     ft.text(0, 0.02, "flighthome.app", color=FH["orange"], fontsize=20, fontweight="bold", va="bottom")
-    ft.text(1, 0.02, credit + " · Map: Natural Earth", color=FH["muted"], fontsize=11, ha="right", va="bottom")
+    # airplanes.live asks for a clearly visible credit with the link: own line, larger and darker than the others
+    apl = "Data by Airplanes.Live (airplanes.live)"
+    if apl in credit:
+        rest = " · ".join(p for p in credit.split(" · ") if p != apl)
+        ft.text(1, 0.13, "Data by Airplanes.Live · airplanes.live", color=FH["navy"], fontsize=15, fontweight="bold",
+                ha="right", va="bottom")
+        credit = rest
+    ft.text(1, 0.02, (credit + " · " if credit else "") + "Map: Natural Earth", color=FH["muted"], fontsize=11, ha="right", va="bottom")
     fig.savefig(out_path, dpi=DPI, facecolor=fig.get_facecolor())
     plt.close(fig)
     return out_path
