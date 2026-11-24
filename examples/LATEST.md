@@ -1,6 +1,6 @@
 # Exemplos do robô de redes sociais
 
-Gerado a 24/11/2026 10:33 (hora de Lisboa) com dados reais. **Nada foi publicado.**
+Gerado a 24/11/2026 10:45 (hora de Lisboa) com dados reais. **Nada foi publicado.**
 
 ## SwimHeat — provas da semana
 - **Quando:** segunda-feira 19:00
@@ -61,16 +61,16 @@ Todos los resultados en la app · All results in the app.
 ```
 ⚠️ Severe weather warnings in Europe · 24 Nov
 
-• Italy: 🟠 6 orange — rain, thunderstorms, wind
 • Montenegro: 🟠 3 orange — wind
 • Spain: 🟠 3 orange — coastal
+• Italy: 🟠 2 orange — thunderstorms
 • Croatia: 🟠 1 orange — rain, wind
 (number of regions with a warning)
 
 🇵🇹 Avisos laranja e vermelhos na Europa hoje:
-• Itália: 🟠 6 — chuva, trovoada, vento
 • Montenegro: 🟠 3 — vento
 • Espanha: 🟠 3 — agitação marítima
+• Itália: 🟠 2 — trovoada
 • Croácia: 🟠 1 — chuva, vento
 
 Official warnings on a live map, alerts for your area and your trip: stormhome.app (link in bio)
