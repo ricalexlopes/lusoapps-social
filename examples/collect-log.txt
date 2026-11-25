@@ -1,5 +1,11 @@
-2026-11-25T02:24:33+00:00
-day 2026-11-25 7700 landed: []
+2026-11-25T14:18:49+00:00
+day 2026-11-25 7700 landed: ['SKW554V', 'MEDX528', 'UAQ08']
+trace aa998e flighthome HTTPError HTTP Error 502: Bad Gateway
+trace aa998e adsb.lol HTTPError HTTP Error 403: Forbidden
+trace adfd6d flighthome HTTPError HTTP Error 502: Bad Gateway
+trace adfd6d adsb.lol HTTPError HTTP Error 403: Forbidden
+trace 400eb4 flighthome HTTPError HTTP Error 502: Bad Gateway
+trace 400eb4 adsb.lol HTTPError HTTP Error 403: Forbidden
 day 2026-11-24 7700 landed: ['RCH9202', 'FDB3XU']
 trace ae0812 flighthome HTTPError HTTP Error 502: Bad Gateway
 trace ae0812 adsb.lol HTTPError HTTP Error 403: Forbidden
