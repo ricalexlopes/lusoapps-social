@@ -1,8 +1,4 @@
-2026-11-26T00:18:52+00:00
+2026-11-26T10:51:45+00:00
 day 2026-11-26 7700 landed: []
 day 2026-11-25 7700 landed: ['SKW554V', 'MEDX528', 'UAQ08', 'JTL400']
-trace aa998e from flighthome 1126 points
-trace adfd6d from flighthome 449 points
-trace 400eb4 from flighthome 706 points
-trace a4ace1 from flighthome 418 points
-collect: 4 new tracks
+collect: 0 new tracks
