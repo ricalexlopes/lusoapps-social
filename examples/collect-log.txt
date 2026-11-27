@@ -1,4 +1,5 @@
-2026-11-27T13:52:47+00:00
-day 2026-11-27 7700 landed: []
+2026-11-27T22:42:12+00:00
+day 2026-11-27 7700 landed: ['TVF73LL']
+trace 39d302 from flighthome 646 points
 day 2026-11-26 7700 landed: ['MSR781', 'EZY18NP']
-collect: 0 new tracks
+collect: 1 new tracks
