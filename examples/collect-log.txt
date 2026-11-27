@@ -1,5 +1,4 @@
-2026-11-27T04:14:09+00:00
+2026-11-27T13:52:47+00:00
 day 2026-11-27 7700 landed: []
 day 2026-11-26 7700 landed: ['MSR781', 'EZY18NP']
-trace 407666 from flighthome 2052 points
-collect: 1 new tracks
+collect: 0 new tracks
