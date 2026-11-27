@@ -1,5 +1,5 @@
-2026-11-26T21:28:53+00:00
-day 2026-11-26 7700 landed: ['MSR781']
-trace 010205 from flighthome 927 points
-day 2026-11-25 7700 landed: ['SKW554V', 'MEDX528', 'UAQ08', 'JTL400']
+2026-11-27T04:14:09+00:00
+day 2026-11-27 7700 landed: []
+day 2026-11-26 7700 landed: ['MSR781', 'EZY18NP']
+trace 407666 from flighthome 2052 points
 collect: 1 new tracks
