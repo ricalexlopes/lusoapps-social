@@ -1,4 +1,5 @@
-2026-11-28T07:44:04+00:00
-day 2026-11-28 7700 landed: []
+2026-11-28T16:52:35+00:00
+day 2026-11-28 7700 landed: ['AJT8641']
+trace a3defb from flighthome 499 points
 day 2026-11-27 7700 landed: ['TVF73LL']
-collect: 0 new tracks
+collect: 1 new tracks
